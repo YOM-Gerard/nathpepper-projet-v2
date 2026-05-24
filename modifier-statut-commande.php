@@ -93,7 +93,7 @@ HTML;
         }
     }
 
-    // 3. DÉCLENCHEMENT DU MAIL DE CONFIRMATION D'ACHAT
+    // 3. DÉCLENCHEMENT DU MAIL DE CONFIRMATION D'ACHAT & DÉCRÉMENTATION DES STOCKS
     if ($new_status === 'paid') {
         // Récupérer les informations du client et de la commande
         $stmtInfoPaid = $pdo->prepare("
@@ -110,10 +110,23 @@ HTML;
             $totalCommandePaid = number_format($infoPaid['total_amount'], 2, ',', ' ') . ' €';
             $sujetPaid = "Confirmation de votre commande Nathpepper #" . $order_id . " !";
 
-            // Récupérer les articles commandés pour les lister dans le mail
+            // Récupérer les articles commandés pour les lister dans le mail et impacter les stocks
             $stmtItems = $pdo->prepare("SELECT * FROM order_items WHERE order_id = :order_id");
             $stmtItems->execute(['order_id' => $order_id]);
             $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+
+            // --- MISE À JOUR LOGISTIQUE DES STOCKS EN TEMPS RÉEL ---
+            foreach ($items as $item) {
+                $stmtUpdateStock = $pdo->prepare("
+                    UPDATE products 
+                    SET stock = stock - :quantity 
+                    WHERE id = :product_id AND stock >= :quantity
+                ");
+                $stmtUpdateStock->execute([
+                    'quantity'   => intval($item['quantity']),
+                    'product_id' => intval($item['product_id'])
+                ]);
+            }
 
             // Génération des lignes du tableau HTML pour les produits
             $lignesProduits = "";
@@ -140,34 +153,4 @@ HTML;
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-family: Arial, sans-serif; background-color: #1f1f1f; border-radius: 6px; overflow: hidden; border: 1px solid #2d2d2d;">
                     <thead>
                         <tr style="background-color: #18191b;">
-                            <th style="padding: 12px 10px; text-align: left; color: #dbc49d; font-size: 13px; font-weight: bold; border-bottom: 1px solid #2d2d2d; font-family: Arial, sans-serif;">Produit</th>
-                            <th style="padding: 12px 10px; text-align: right; color: #dbc49d; font-size: 13px; font-weight: bold; border-bottom: 1px solid #2d2d2d; font-family: Arial, sans-serif;">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {$lignesProduits}
-                        <tr style="background-color: #18191b;">
-                            <td style="padding: 15px 10px; font-weight: bold; color: #dbc49d; font-family: Arial, sans-serif;">Montant Total TTC :</td>
-                            <td style="padding: 15px 10px; font-weight: bold; color: #dbc49d; text-align: right; font-size: 16px; font-family: Arial, sans-serif;">{$totalCommandePaid}</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <p style="margin-bottom: 30px; color: #dddddd; font-family: Arial, sans-serif;">Dès que votre colis quittera notre atelier, un nouvel e-mail vous sera envoyé contenant votre lien de suivi logistique.</p>
-                
-                <div style="text-align: center; margin: 35px 0;">
-                    <a href="http://localhost/nathpepper/mes-commandes.php" style="display: inline-block; background-color: #dbc49d; color: #1a1b1c; padding: 14px 30px; text-decoration: none; border-radius: 4px; font-weight: 700; font-size: 13px; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(219,196,157,0.15); text-transform: uppercase; font-family: Arial, sans-serif;">Accéder à mon espace</a>
-                </div>
-                
-                <p style="margin-top: 30px; border-top: 1px solid #2d2d2d; padding-top: 20px; font-size: 14px; color: #8a8a8a; font-family: Arial, sans-serif;">À très bientôt pour votre dégustation,<br><strong style="color: #dbc49d;">L'équipe Nathpepper</strong></p>
-HTML;
-
-            // Envoi de la confirmation d'achat
-            envoyerEmailNathpepper($infoPaid['email'], $sujetPaid, $htmlPaid);
-        }
-    }
-
-    echo json_encode(['success' => true, 'message' => 'Statut mis à jour et e-mail envoyé avec succès !']);
-} catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Erreur BDD : ' . $e->getMessage()]);
-}
+                            <th style="padding: 12px 10px; text-align
