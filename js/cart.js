@@ -117,17 +117,8 @@ function saveAndRefreshCart() {
     updateCartCount();
     renderCartItems();
     
-    // CORRECTION COMPATIBILITÉ PANIER.PHP : Si la fonction d'affichage de panier-visuel.js existe, on l'exécute
-    if (typeof renderCartPage === 'function') {
-        renderCartPage();
-    } else if (typeof initCartPage === 'function') {
-        initCartPage();
-    } else {
-        // Fallback sécurisé si les structures diffèrent : on rafraîchit simplement le tableau principal
-        const tableBody = document.getElementById('cart-table-body');
-        if (tableBody) {
-            window.location.reload();
-        }
+    if (typeof afficherLePanierVisuel === 'function') {
+        afficherLePanierVisuel();
     }
 }
 
@@ -145,56 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
         clearCartBtn.addEventListener('click', () => {
             window.cart = [];
             saveAndRefreshCart();
-        });
-    }
-
-    // --- LOGIQUE UNIVERSELLE DE COMMANDE ---
-    const checkoutBtn = document.getElementById('checkout-btn') || document.getElementById('checkout-button');
-
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-
-            if (window.cart.length === 0) {
-                alert("Votre panier est vide.");
-                return;
-            }
-
-            const originalText = checkoutBtn.textContent || checkoutBtn.value;
-            
-            checkoutBtn.style.pointerEvents = 'none';
-            checkoutBtn.style.opacity = '0.7';
-            checkoutBtn.textContent = "Vérification des stocks...";
-
-            fetch('valider-commande.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ basket: window.cart })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("✓ Stocks validés ! Passage au paiement sécurisé...");
-                    window.cart = [];
-                    localStorage.setItem('cart', JSON.stringify(window.cart));
-                    updateCartCount();
-                    window.location.href = 'paiement.php?order_id=' + data.order_id;
-                } else {
-                    alert("⚠️ " + data.message);
-                    checkoutBtn.style.pointerEvents = 'auto';
-                    checkoutBtn.style.opacity = '1';
-                    checkoutBtn.textContent = originalText;
-                }
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-                alert("Une erreur technique est survenue lors de la validation.");
-                checkoutBtn.style.pointerEvents = 'auto';
-                checkoutBtn.style.opacity = '1';
-                checkoutBtn.textContent = originalText;
-            });
         });
     }
 });
