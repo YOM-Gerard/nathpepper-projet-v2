@@ -1,8 +1,9 @@
 <?php
 session_start();
 
-// 1. Inclure la bibliothèque Stripe téléchargée
+// 1. Inclure la bibliothèque Stripe téléchargée et la connexion BDD
 require_once 'stripe-php/init.php';
+require_once 'includes/db.php'; // On importe la variable de connexion $pdo
 
 // 2. Décodeur maison de fichier .env (Version blindée contre les espaces/guillemets)
 if (file_exists(__DIR__ . '/.env')) {
@@ -43,9 +44,16 @@ try {
     }
 
     $line_items = [];
+    $total_amount = 0; // On initialise le calcul du montant total pour notre BDD
     
     // On prépare la liste des produits au format exigé par Stripe
     foreach ($items as $item) {
+        $price = floatval($item['price'] ?? $item['prix'] ?? 0);
+        $quantity = intval($item['quantity'] ?? $item['qte'] ?? 1);
+        
+        // Accumulation du total général (Ex: 5,09 * 2 = 10,18)
+        $total_amount += ($price * $quantity);
+
         $image_url = $item['image'] ?? 'images/default-pepper.jpg';
         if (strpos($image_url, 'http') !== 0) {
             $image_url = 'http://localhost/nathpepper/' . ltrim($image_url, '/');
@@ -58,9 +66,9 @@ try {
                     'name' => $item['name'] ?? $item['nom'] ?? 'Poivre',
                     'images' => [$image_url],
                 ],
-                'unit_amount' => round(($item['price'] ?? $item['prix'] ?? 0) * 100),
+                'unit_amount' => round($price * 100),
             ],
-            'quantity' => $item['quantity'] ?? $item['qte'] ?? 1,
+            'quantity' => $quantity,
         ];
     }
 
@@ -73,9 +81,48 @@ try {
         'cancel_url' => 'http://localhost/nathpepper/panier.php',
     ]);
 
+    // ==========================================
+    // 🗄️ SAUVEGARDE EN BASE DE DONNÉES (PENDING)
+    // ==========================================
+    
+    // On démarre une transaction PDO pour s'assurer que tout s'enregistre ou rien du tout (évite les bugs)
+    $pdo->beginTransaction();
+
+    // 1. Insertion dans la table des commandes principales 'orders'
+    $stmtOrder = $pdo->prepare("INSERT INTO orders (stripe_session_id, total_amount, status) VALUES (:stripe_id, :total, 'pending')");
+    $stmtOrder->execute([
+        'stripe_id' => $session->id,
+        'total'     => $total_amount
+    ]);
+    
+    // On récupère l'ID numérique généré par MySQL pour cette commande
+    $order_id = $pdo->lastInsertId();
+
+    // 2. Insertion de chaque produit dans la table de détails 'order_items'
+    $stmtItem = $pdo->prepare("INSERT INTO order_items (order_id, product_id, product_name, price, quantity) VALUES (:order_id, :product_id, :p_name, :price, :qty)");
+    
+    foreach ($items as $item) {
+        $stmtItem->execute([
+            'order_id'   => $order_id,
+            'product_id' => intval($item['id'] ?? 0),
+            'p_name'     => $item['name'] ?? $item['nom'] ?? 'Poivre',
+            'price'      => floatval($item['price'] ?? $item['prix'] ?? 0),
+            'qty'        => intval($item['quantity'] ?? $item['qte'] ?? 1)
+        ]);
+    }
+
+    // On valide définitivement l'écriture des deux tables en BDD
+    $pdo->commit();
+
+    // On envoie enfin la réponse JSON avec l'URL Stripe au JavaScript
     echo json_encode(['url' => $session->url]);
 
 } catch (Exception $e) {
+    // Si l'écriture en BDD a planté au milieu, on annule tout pour ne pas avoir de données corrompues
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
 }
