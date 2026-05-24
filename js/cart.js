@@ -45,7 +45,7 @@ function addToCart(id, name, price, imageUrl) {
 }
 
 // ==========================================
-// 🛠️ NOUVEAU CHANTIER : ACTIONS DU PANIER VISUEL
+// 🛠️ ACTIONS DU PANIER VISUEL
 // ==========================================
 
 // 3. Fonction pour générer le HTML de la liste des produits dans le panier
@@ -133,17 +133,17 @@ function saveAndRefreshCart() {
     renderCartItems(); // Redessine instantanément l'intérieur du panier
 }
 
-// 8. On affiche la bonne quantité et on prépare le panier dès le chargement de la page
+// 8. Préparation et écouteurs d'événements au chargement DOM
 document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     
-    // On écoute aussi le clic sur le bouton du panier dans le header pour forcer le dessin des articles
+    // On écoute le clic sur le bouton du panier dans le header pour rafraîchir la liste
     const cartHeaderBtn = document.getElementById('btn-cart') || document.querySelector('.nav-icon[id*="cart"]');
     if (cartHeaderBtn) {
         cartHeaderBtn.addEventListener('click', renderCartItems);
     }
     
-    // Événement pour le bouton "Vider le panier" déjà présent dans ton HTML
+    // Événement pour le bouton "Vider le panier"
     const clearCartBtn = document.getElementById('clear-cart');
     if (clearCartBtn) {
         clearCartBtn.addEventListener('click', () => {
@@ -151,19 +151,29 @@ document.addEventListener('DOMContentLoaded', () => {
             saveAndRefreshCart();
         });
     }
-    // --- GESTION DU BOUTON COMMANDER AVEC VÉRIFICATION DES STOCKS ---
-    const checkoutBtn = document.getElementById('checkout-btn');
+
+    // --- LOGIQUE UNIVERSELLE DE COMMANDE & VÉRIFICATION DES STOCKS ---
+    // On cherche l'ID du modal OU l'ID de la page panier.php
+    const checkoutBtn = document.getElementById('checkout-btn') || document.getElementById('checkout-button');
+
     if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', () => {
+        checkoutBtn.addEventListener('click', (e) => {
+            // Empêche tout comportement par défaut indésirable
+            e.preventDefault();
+
             if (window.cart.length === 0) {
                 alert("Votre panier est vide.");
                 return;
             }
 
-            checkoutBtn.disabled = true;
+            const originalText = checkoutBtn.textContent || checkoutBtn.value;
+            
+            // Blocage du bouton le temps de la requête
+            checkoutBtn.style.pointerEvents = 'none';
+            checkoutBtn.style.opacity = '0.7';
             checkoutBtn.textContent = "Vérification des stocks...";
 
-            // On envoie le panier complet au fichier PHP pour vérification
+            // Envoi asynchrone du panier complet à valider-commande.php
             fetch('valider-commande.php', {
                 method: 'POST',
                 headers: {
@@ -174,27 +184,29 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Si les stocks sont OK, on redirige vers l'étape suivante (ex: paiement ou confirmation)
-                    alert("Stocks validés ! Passage à la commande...");
-                    // Optionnel : Tu peux vider le panier local ici si nécessaire
+                    alert("✓ Stocks validés ! Passage au paiement sécurisé...");
+                    
+                    // Vidage du panier local
                     window.cart = [];
                     localStorage.setItem('cart', JSON.stringify(window.cart));
                     updateCartCount();
                     
-                    window.location.href = 'confirmation.php?order_id=' + data.order_id;
+                    // Redirection dynamique vers ton tunnel de paiement
+                    window.location.href = 'paiement.php?order_id=' + data.order_id;
                 } else {
-                    // Si une erreur de stock ou de connexion survient, on affiche le message d'adresse précis renvoyé par PHP
+                    // Si rupture de stock détectée par valider-commande.php
                     alert("⚠️ " + data.message);
-                    checkoutBtn.disabled = false;
-                    checkoutBtn.textContent = "Commander";
+                    checkoutBtn.style.pointerEvents = 'auto';
+                    checkoutBtn.style.opacity = '1';
+                    checkoutBtn.textContent = originalText;
                 }
             })
             .catch(error => {
                 console.error('Erreur:', error);
-                alert("Une erreur est survenue lors de la validation.");
-                checkoutBtn.disabled = false;
-                checkoutBtn.textContent = "Commander";
+                alert("Une erreur technique est survenue lors de la validation.");
+                checkoutBtn.style.pointerEvents = 'auto';
+                checkoutBtn.style.opacity = '1';
+                checkoutBtn.textContent = originalText;
             });
         });
     }
-});

@@ -154,6 +154,7 @@ session_start();
 
     <?php require_once 'includes/footer.php'; ?>
 
+    <script src="js/cart.js"></script>
     <script src="js/panier-visuel.js"></script>
 </body>
 </html>
