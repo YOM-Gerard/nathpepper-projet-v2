@@ -14,7 +14,7 @@ function envoyerEmailNathpepper($to, $subject, $messageHtml) {
         <div style='max-width: 600px; margin: 20px auto; border: 1px solid #2d2d2d; border-radius: 8px; overflow: hidden; background-color: #1a1b1c; box-shadow: 0 4px 15px rgba(0,0,0,0.5);'>
             
             <div style='background-color: #18191b; padding: 40px 20px; text-align: center; border-bottom: 1px solid #2d2d2d;'>
-                <h1 style='color: #dbc49d; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 5px; font-family: \"Playfair Display\", Georgia, serif;'>NTHPR.</h1>
+                <h1 style='color: #dbc49d; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 5px; font-family: \"Playfair Display\", Georgia, serif;'>NATHPEPPER.</h1>
                 <p style='color: #e4cca2; margin: 6px 0 0 0; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 500;'>Épices Rares & Poivres d'Exception</p>
             </div>
             
