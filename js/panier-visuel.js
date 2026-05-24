@@ -112,7 +112,7 @@ function updateBadgeHeader() {
 document.addEventListener('DOMContentLoaded', () => {
     afficherLePanierVisuel();
 
-    // 4. Gestion du bouton de paiement Stripe
+    // 4. Gestion du bouton de paiement avec DOUBLE SÉCURITÉ (Stocks puis Stripe)
     const checkoutBtn = document.getElementById('checkout-button');
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', () => {
@@ -121,34 +121,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            checkoutBtn.textContent = "Redirection sécurisée...";
+            checkoutBtn.textContent = "Vérification des stocks...";
             checkoutBtn.disabled = true;
 
-            // Envoi des données au PHP
-            fetch('creer-session-paiement.php', {
+            // ÉTAPE A : On interroge notre barrière de sécurité PHP pour valider l'inventaire
+            fetch('valider-commande.php', {
                 method: 'POST',
                 headers: {
-                    // Correction de syntaxe potentielle sur l'importation ou l'envoi de session
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ items: window.cart })
+                body: JSON.stringify({ basket: window.cart })
             })
             .then(response => response.json())
-            .then(session => {
-                if (session.url) {
-                    window.location.href = session.url; // Décollage vers Stripe !
+            .then(stockData => {
+                if (stockData.success) {
+                    // ÉTAPE B : Les stocks sont validés ! On enchaîne sur la création de session Stripe
+                    checkoutBtn.textContent = "Redirection sécurisée...";
+                    
+                    return fetch('creer-session-paiement.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ items: window.cart })
+                    });
                 } else {
+                    // Rupture de stock détectée ! On lève une erreur pour couper la chaîne du paiement
+                    throw new Error(stockData.message);
+                }
+            })
+            .then(response => {
+                if (response) return response.json();
+            })
+            .then(session => {
+                if (session && session.url) {
+                    // On vide le panier local avant de quitter le site vers Stripe
+                    window.cart = [];
+                    localStorage.setItem('cart', JSON.stringify(window.cart));
+                    
+                    window.location.href = session.url; // Décollage vers Stripe !
+                } else if (session) {
                     alert("Erreur Stripe : " + (session.error || "Impossible d'ouvrir la page de paiement."));
                     checkoutBtn.textContent = "Procéder au paiement sécurisé";
                     checkoutBtn.disabled = false;
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert("Une erreur technique est survenue lors de la liaison avec Stripe.");
-                checkoutBtn.textContent = "Procéder au paiement sécurisé";
-                checkoutBtn.disabled = false;
-            });
-        });
-    }
-});
+                // Interception globale (Ruptures de stock ou plantages réseau)
+                alert("⚠️ " + error.message);
