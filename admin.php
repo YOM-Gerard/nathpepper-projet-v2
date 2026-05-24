@@ -156,4 +156,64 @@ try {
                                     <td><strong>#<?php echo $order['id']; ?></strong></td>
                                     <td><?php echo date('d/m/Y H:i', strtotime($order['created_at'])); ?></td>
                                     <td>
-                                        <?php if ($order
+                                        <?php if (!empty($order['user_id'])): ?>
+                                            <strong><?php echo htmlspecialchars($order['client_name'] ?? ''); ?></strong><br>
+                                            <small style="color: #777;"><?php echo htmlspecialchars($order['client_email'] ?? ''); ?></small>
+                                        <?php else: ?>
+                                            <span style="color: #888; font-style: italic;">Achat Invité</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <ul class="items-list">
+                                        <?php
+                                        $stmtItems = $pdo->prepare("SELECT * FROM order_items WHERE order_id = :order_id");
+                                        $stmtItems->execute(['order_id' => $order['id']]);
+                                        $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+                                        foreach ($items as $item) {
+                                            echo "<li>" . htmlspecialchars($item['product_name'] ?? '') . " <strong>(x" . $item['quantity'] . ")</strong></li>";
+                                        }
+                                        ?>
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <strong><?php echo number_format($order['total_amount'], 2, ',', ' '); ?> €</strong><br>
+                                        <a href="facture.php?id=<?php echo $order['id']; ?>" target="_blank" style="font-size: 0.75rem; color: #0d47a1; text-decoration: none; font-weight: 600;">📄 Voir Facture PDF</a>
+                                    </td>
+                                    <td>
+                                        <select class="status-select" data-order-id="<?php echo $order['id']; ?>">
+                                            <option value="pending" <?php echo $order['status'] === 'pending' ? 'selected' : ''; ?>>⏳ En attente</option>
+                                            <option value="paid" <?php echo $order['status'] === 'paid' ? 'selected' : ''; ?>>📦 Payée (À préparer)</option>
+                                            <option value="processing" <?php echo $order['status'] === 'processing' ? 'selected' : ''; ?>>🛠️ En préparation</option>
+                                            <option value="shipped" <?php echo $order['status'] === 'shipped' ? 'selected' : ''; ?>>🚚 Expédiée</option>
+                                            <option value="delivered" <?php echo $order['status'] === 'delivered' ? 'selected' : ''; ?>>✓ Livrée</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+
+            <?php endif; ?>
+        </section>
+    </main>
+
+    <?php require_once 'includes/footer.php'; ?>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Moteur logistique initialisé !");
+
+        // --- RENDER DU GRAPHIQUE ANALYTIQUE CHART.JS ---
+        const ctx = document.getElementById('caChart').getContext('2d');
+        const labelsDays = <?php echo json_encode($labelsGraph); ?>;
+        const dataSales = <?php echo json_encode($valuesGraph); ?>;
+
+        const finalLabels = labelsDays.length > 0 ? labelsDays : ['Pas d\'activité'];
+        const finalData = dataSales.length > 0 ? dataSales : [0];
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: finalLabels,
+                datasets:
