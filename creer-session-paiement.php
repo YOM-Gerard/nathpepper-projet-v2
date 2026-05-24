@@ -85,14 +85,18 @@ try {
     // 🗄️ SAUVEGARDE EN BASE DE DONNÉES (PENDING)
     // ==========================================
     
+    // MODIFICATION : On vérifie si l'acheteur est connecté à un compte utilisateur
+    $user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
+
     // On démarre une transaction PDO pour s'assurer que tout s'enregistre ou rien du tout (évite les bugs)
     $pdo->beginTransaction();
 
-    // 1. Insertion dans la table des commandes principales 'orders'
-    $stmtOrder = $pdo->prepare("INSERT INTO orders (stripe_session_id, total_amount, status) VALUES (:stripe_id, :total, 'pending')");
+    // Insertion dans la table 'orders' avec la colonne user_id incluse
+    $stmtOrder = $pdo->prepare("INSERT INTO orders (stripe_session_id, total_amount, status, user_id) VALUES (:stripe_id, :total, 'pending', :user_id)");
     $stmtOrder->execute([
         'stripe_id' => $session->id,
-        'total'     => $total_amount
+        'total'     => $total_amount,
+        'user_id'   => $user_id // Vaudra l'ID si connecté, ou NULL si achat invité
     ]);
     
     // On récupère l'ID numérique généré par MySQL pour cette commande
