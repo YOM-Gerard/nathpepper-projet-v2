@@ -157,22 +157,47 @@ try {
     <?php require_once 'includes/footer.php'; ?>
 
     <script>
-    document.querySelectorAll('.status-select').forEach(select => {
-        select.addEventListener('change', function() {
-            const orderId = this.getAttribute('data-order-id');
-            const newStatus = this.value;
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Moteur logistique initialisé !");
 
-            // Signal visuel de chargement
-            this.style.borderColor = '#0d47a1';
-            this.style.background = '#e3f2fd';
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.addEventListener('change', function() {
+                const orderId = this.getAttribute('data-order-id');
+                const newStatus = this.value;
 
-            fetch('modifier-statut-commande.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ order_id: orderId, status: newStatus })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Confirmation verte éphémère
-                    this
+                // Signal visuel de chargement
+                this.style.borderColor = '#0d47a1';
+                this.style.background = '#e3f2fd';
+
+                fetch('modifier-statut-commande.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_id: orderId, status: newStatus })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Confirmation verte éphémère
+                        this.style.borderColor = '#2e7d32';
+                        this.style.background = '#e8f5e9';
+                        setTimeout(() => {
+                            this.style.borderColor = '#ccc';
+                            this.style.background = '#fff';
+                        }, 1200);
+                    } else {
+                        // Si le serveur refuse, on l'affiche et on recharge pour annuler le choix visuel
+                        alert('Refus du serveur : ' + data.message);
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur de communication avec le script PHP.');
+                    window.location.reload();
+                });
+            });
+        });
+    });
+    </script>
+</body>
+</html>
