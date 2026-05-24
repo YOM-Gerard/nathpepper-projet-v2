@@ -1,3 +1,17 @@
+<?php
+// 1. Inclusion de ton fichier de connexion (Correction du dossier)
+require_once 'includes/db.php'; 
+
+try {
+    // 2. On récupère les 4 premiers poivres actifs de ta BDD
+    // CORRECTION : On utilise la variable $pdo définie dans ton fichier db.php
+    $query = $pdo->query("SELECT * FROM products LIMIT 4"); 
+    $products = $query->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    // Si la BDD a un problème ou si la table ne s'appelle pas "products", on crée un tableau vide pour éviter le crash
+    $products = [];
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -9,15 +23,29 @@
     <link rel="stylesheet" href="styles/components.css">
     <link rel="stylesheet" href="styles/responsive.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        .product-image-container {
+            width: 100%;
+            height: 250px; /* Hauteur harmonieuse fixe pour toutes les images */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+        }
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Centre et recadre l'image proprement */
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
     <?php include 'includes/header.php'; ?>
         
 
-    <!-- Main Content -->
     <main>
-        <!-- Hero Section -->
         <section id="accueil" class="hero">
             <div class="hero-content">
                 <h1 class="hero-title">L'Excellence du Poivre</h1>
@@ -29,19 +57,54 @@
             </div>
         </section>
 
-        <!-- Products Section -->
         <section id="nos-poivres" class="products-section">
             <div class="container">
                 <h2 class="section-title">Nos Poivres d'Exception</h2>
                 <p class="section-subtitle">Une sélection rigoureuse de poivres premium pour sublimer vos créations culinaires</p>
                 
                 <div class="products-grid" id="products-grid">
-                    <!-- Products will be loaded here by JavaScript -->
+                    <?php if (!empty($products)): ?>
+                        <?php foreach ($products as $product): 
+                            // Récupération dynamique ajustée aux colonnes exactes de ta table SQL (image -> image_url)
+                            $p_id = $product['id'] ?? 0;
+                            $p_name = $product['name'] ?? $product['nom'] ?? 'Poivre';
+                            $p_price = $product['price'] ?? $product['prix'] ?? 0;
+                            $p_desc = $product['description'] ?? '';
+                            
+                            // On lit la bonne colonne 'image_url' (ex: public/images/poivre-noir.png)
+                            $db_image = $product['image_url'] ?? '';
+                            
+                            // Sécurité d'extension : on extrait le nom du fichier et on force le dossier physique en .jpg
+                            $filename = pathinfo($db_image, PATHINFO_FILENAME); // Récupère "poivre-noir"
+                            $p_image = "./public/images/products/" . $filename . ".jpg";
+                        ?>
+                            <div class="product-card">
+                                <div class="product-image-container">
+                                    <img src="<?php echo htmlspecialchars($p_image); ?>" alt="<?php echo htmlspecialchars($p_name); ?>">
+                                </div>
+                                <div class="product-info">
+                                    <h3><?php echo htmlspecialchars($p_name); ?></h3>
+                                    <p class="product-desc"><?php echo htmlspecialchars($p_desc); ?></p>
+                                    <p class="price"><?php echo number_format($p_price, 2, ',', ' '); ?> €</p>
+                                    
+                                    <button class="btn-primary add-to-cart-btn" onclick="addToCart(
+                                        '<?php echo $p_id; ?>', 
+                                        '<?php echo addslashes($p_name); ?>', 
+                                        '<?php echo $p_price; ?>', 
+                                        '<?php echo addslashes($p_image); ?>'
+                                    )">
+                                        Ajouter au panier
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Aucun poivre disponible pour le moment.</p>
+                    <?php endif; ?>
                 </div>
             </div>
         </section>
 
-        <!-- Brand Section -->
         <section id="notre-marque" class="brand-section">
             <div class="container">
                 <div class="brand-content">
@@ -78,7 +141,6 @@
             </div>
         </section>
 
-        <!-- Contact Section -->
         <section id="contact" class="contact-section">
             <div class="container">
                 <h2 class="section-title">Contactez-nous</h2>
@@ -115,10 +177,8 @@
         </section>
     </main>
 
-    <!-- Footer -->
     <?php include 'includes/footer.php'; ?>
 
-    <!-- Modals -->
     <div id="product-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
@@ -186,7 +246,6 @@
         </div>
     </div>
 
-    <script src="js/products.js"></script>
     <script src="js/cart.js"></script>
     <script src="js/modals.js"></script>
     <script src="js/main.js"></script>
