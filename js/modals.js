@@ -227,3 +227,38 @@ window.openModal = function(modal) {
 window.closeModal = function(modal) {
     modal.classList.remove('show');
 };
+
+// 4. Fonction pour augmenter la quantité (+1)
+function changeQuantityPlus(index) {
+    window.cart[index].quantity += 1;
+    saveAndRefreshCart();
+}
+
+// 5. Fonction pour diminuer la quantité (-1) ou supprimer si elle tombe à 0
+function changeQuantityMinus(index) {
+    window.cart[index].quantity -= 1;
+    
+    if (window.cart[index].quantity <= 0) {
+        window.cart.splice(index, 1); // Supprime l'article du tableau s'il n'y en a plus
+    }
+    saveAndRefreshCart();
+}
+
+// 6. Fonction pour supprimer complètement un article (la petite croix/poubelle)
+function removeProductFromCart(index) {
+    window.cart.splice(index, 1); // Retire l'élément à cet index
+    saveAndRefreshCart();
+}
+
+// 7. Fonction outil pour sauvegarder la mémoire et mettre à jour l'affichage partout
+function saveAndRefreshCart() {
+    localStorage.setItem('cart', JSON.stringify(window.cart));
+    updateCartCount(); // Met à jour le petit badge du header
+    
+    // Si la fonction globale pour redessiner le panier visuel existe, on l'exécute
+    if (typeof renderCartItems === 'function') {
+        renderCartItems();
+    } else if (typeof displayCart === 'function') {
+        displayCart();
+    }
+}

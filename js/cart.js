@@ -34,14 +34,121 @@ function addToCart(id, name, price, imageUrl) {
         });
     }
 
-    // CORRECTION ICI : On utilise la même clé 'cart' partout sur le site !
+    // On utilise la même clé 'cart' partout sur le site !
     localStorage.setItem('cart', JSON.stringify(window.cart));
 
     // On met à jour le chiffre en haut de l'écran
     updateCartCount();
+    
+    // Si le modal du panier est ouvert, on rafraîchit son contenu visuel
+    renderCartItems();
 }
 
-// 3. On affiche la bonne quantité dès que la page se charge
+// ==========================================
+// 🛠️ NOUVEAU CHANTIER : ACTIONS DU PANIER VISUEL
+// ==========================================
+
+// 3. Fonction pour générer le HTML de la liste des produits dans le panier
+function renderCartItems() {
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartTotalElement = document.getElementById('cart-total');
+    
+    if (!cartItemsContainer) return; // Sécurité si on n'est pas sur une page avec le modal panier
+    
+    // Si le panier est vide
+    if (window.cart.length === 0) {
+        cartItemsContainer.innerHTML = '<p class="empty-cart-msg">Votre panier est vide.</p>';
+        if (cartTotalElement) cartTotalElement.textContent = '0,00 €';
+        return;
+    }
+    
+    let htmlContent = '';
+    let grandTotal = 0;
+    
+    // On boucle sur chaque produit du panier pour fabriquer le HTML
+    window.cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        grandTotal += itemTotal;
+        
+        htmlContent += `
+            <div class="cart-item-row" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #eee;">
+                <div class="cart-item-info" style="display: flex; align-items: center; gap: 15px;">
+                    <img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                    <div>
+                        <h4 style="margin: 0; font-family: 'Playfair Display', serif;">${item.name}</h4>
+                        <span style="color: #666; font-size: 0.9rem;">${item.price.toFixed(2).replace('.', ',')} € / unité</span>
+                    </div>
+                </div>
+                
+                <div class="cart-item-actions" style="display: flex; align-items: center; gap: 15px;">
+                    <div class="qty-controls" style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; background: #fff;">
+                        <button onclick="changeQuantityMinus(${index})" style="background: none; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem;">-</button>
+                        <span style="padding: 0 5px; font-weight: 500; min-width: 20px; text-align: center;">${item.quantity}</span>
+                        <button onclick="changeQuantityPlus(${index})" style="background: none; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem;">+</button>
+                    </div>
+                    
+                    <span class="item-total-price" style="font-weight: 600; min-width: 70px; text-align: right;">${itemTotal.toFixed(2).replace('.', ',')} €</span>
+                    
+                    <button onclick="removeProductFromCart(${index})" style="background: none; border: none; color: #cc0000; cursor: pointer; font-size: 1.2rem; padding: 0 5px;" title="Supprimer l'article">🗑️</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    // On injecte le HTML généré dans le conteneur du modal
+    cartItemsContainer.innerHTML = htmlContent;
+    
+    // On met à jour le total général affiché en bas
+    if (cartTotalElement) {
+        cartTotalElement.textContent = grandTotal.toFixed(2).replace('.', ',') + ' €';
+    }
+}
+
+// 4. Augmenter la quantité (+1)
+function changeQuantityPlus(index) {
+    window.cart[index].quantity += 1;
+    saveAndRefreshCart();
+}
+
+// 5. Diminuer la quantité (-1)
+function changeQuantityMinus(index) {
+    window.cart[index].quantity -= 1;
+    
+    if (window.cart[index].quantity <= 0) {
+        window.cart.splice(index, 1); // Retire le produit s'il tombe à 0
+    }
+    saveAndRefreshCart();
+}
+
+// 6. Supprimer complètement un produit
+function removeProductFromCart(index) {
+    window.cart.splice(index, 1);
+    saveAndRefreshCart();
+}
+
+// 7. Fonction utilitaire pour synchroniser les données et redessiner l'interface
+function saveAndRefreshCart() {
+    localStorage.setItem('cart', JSON.stringify(window.cart));
+    updateCartCount();
+    renderCartItems(); // Redessine instantanément l'intérieur du panier
+}
+
+// 8. On affiche la bonne quantité et on prépare le panier dès le chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
+    
+    // On écoute aussi le clic sur le bouton du panier dans le header pour forcer le dessin des articles
+    const cartHeaderBtn = document.getElementById('btn-cart') || document.querySelector('.nav-icon[id*="cart"]');
+    if (cartHeaderBtn) {
+        cartHeaderBtn.addEventListener('click', renderCartItems);
+    }
+    
+    // Événement pour le bouton "Vider le panier" déjà présent dans ton HTML
+    const clearCartBtn = document.getElementById('clear-cart');
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', () => {
+            window.cart = [];
+            saveAndRefreshCart();
+        });
+    }
 });
