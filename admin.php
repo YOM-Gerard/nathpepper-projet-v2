@@ -134,7 +134,10 @@ try {
                                         ?>
                                         </ul>
                                     </td>
-                                    <td><strong><?php echo number_format($order['total_amount'], 2, ',', ' '); ?> €</strong></td>
+                                    <td>
+                                    <strong><?php echo number_format($order['total_amount'], 2, ',', ' '); ?> €</strong><br>
+                                    <a href="facture.php?id=<?php echo $order['id']; ?>" target="_blank" style="font-size: 0.75rem; color: #0d47a1; text-decoration: none; font-weight: 600;">📄 Voir Facture PDF</a>
+                                    </td>
                                     <td>
                                         <select class="status-select" data-order-id="<?php echo $order['id']; ?>">
                                             <option value="pending" <?php echo $order['status'] === 'pending' ? 'selected' : ''; ?>>⏳ En attente</option>

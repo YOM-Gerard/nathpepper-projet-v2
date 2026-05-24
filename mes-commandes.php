@@ -30,19 +30,21 @@ try {
     <title>Mes Commandes - Nathpepper</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         .orders-container { max-width: 800px; margin: 0 auto; padding: 2rem 1rem; }
         .order-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 1.5rem; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .order-header { background: #f9f9f9; padding: 15px 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .order-header { background: #f9f9f9; padding: 15px 20px; border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; align-items: center; }
         .order-header h3 { margin: 0; font-family: var(--font-primary); color: var(--primary-color); }
         .order-body { padding: 20px; }
         .order-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.95rem; }
         .order-item:last-child { border-bottom: none; }
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; text-transform: uppercase; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; text-transform: uppercase; display: inline-block; }
         .status-paid { background-color: #e8f5e9; color: #2e7d32; }
         .status-pending { background-color: #fff3e0; color: #ef6c00; }
         .no-orders { text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px; border: 1px dashed #ccc; }
+        .btn-invoice { display: inline-block; margin-top: 8px; font-size: 0.8rem; color: #0d47a1; text-decoration: none; font-weight: 600; border: 1px solid #0d47a1; padding: 4px 10px; border-radius: 4px; transition: all 0.2s ease; }
+        .btn-invoice:hover { background: #0d47a1; color: #fff; }
     </style>
 </head>
 <body>
@@ -71,6 +73,8 @@ try {
                             <div>
                                 <h3>Commande n°<?php echo $order['id']; ?></h3>
                                 <small style="color: #888;">Passée le : <?php echo date('d/m/Y à H:i', strtotime($order['created_at'])); ?></small>
+                                <br>
+                                <a href="facture.php?id=<?php echo $order['id']; ?>" target="_blank" class="btn-invoice">📄 Télécharger la facture (PDF)</a>
                             </div>
                             <div style="text-align: right;">
                                 <span class="status-badge <?php echo $order['status'] === 'paid' ? 'status-paid' : 'status-pending'; ?>">
