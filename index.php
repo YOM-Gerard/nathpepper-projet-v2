@@ -50,7 +50,7 @@ try {
             <div class="hero-content">
                 <h1 class="hero-title">L'Excellence du Poivre</h1>
                 <p class="hero-subtitle">Découvrez notre sélection de poivres d'exception, cultivés avec passion et respect de l'environnement</p>
-                <button class="btn-primary hero-cta">Découvrir nos poivres</button>
+                <a href="produits.php" class="btn-primary hero-cta" style="text-decoration: none; display: inline-block; text-align: center;">Découvrir nos poivres</a>
             </div>
             <div class="hero-image">
                 <img src="./public/images/products/poivre-exeption.jpg" alt="Poivre de Kampot" class="hero-img">
@@ -122,7 +122,7 @@ try {
                         <div class="brand-values">
                             <div class="value-item">
                                 <h3>🌱 Éthique</h3>
-                                <p>Commerce équitable et respect des producteurs</p>
+                                <p>Commerce équitable and respect des producteurs</p>
                             </div>
                             <div class="value-item">
                                 <h3>🌍 Durable</h3>
@@ -141,38 +141,13 @@ try {
             </div>
         </section>
 
-        <section id="contact" class="contact-section">
-            <div class="container">
-                <h2 class="section-title">Contactez-nous</h2>
-                <div class="contact-content">
-                    <div class="contact-info">
-                        <h3>Nous sommes là pour vous</h3>
-                        <p>Une question sur nos produits ? Besoin de conseils ? N'hésitez pas à nous contacter.</p>
-                        <div class="contact-details">
-                            <div class="contact-item">
-                                <strong>Email:</strong> contact@nathpepper.com
-                            </div>
-                            <div class="contact-item">
-                                <strong>Horaires:</strong> Lun-Ven 9h-18h
-                            </div>
-                        </div>
-                    </div>
-                    <form class="contact-form" id="contact-form">
-                        <div class="form-group">
-                            <label for="name">Nom</label>
-                            <input type="text" id="name" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Message</label>
-                            <textarea id="message" name="message" rows="5" required></textarea>
-                        </div>
-                        <button type="submit" class="btn-primary">Envoyer</button>
-                    </form>
-                </div>
+        <section id="contact" class="contact-section" style="background-color: #1a1b1c; border-top: 1px solid #2d2d2d; border-bottom: 1px solid #2d2d2d; padding: 5rem 1rem; text-align: center;">
+            <div class="container" style="max-width: 700px; margin: 0 auto;">
+                <h2 style="font-family: 'Playfair Display', Georgia, serif; color: #dbc49d; font-size: 2.3rem; margin-bottom: 1rem; letter-spacing: 1px;">Une demande particulière ?</h2>
+                <p style="color: #cccccc; font-size: 1.05rem; line-height: 1.7; margin-bottom: 2.5rem;">Whether you are a chef, an epicurean, or looking for a tailor-made selection, our concierge service is here to assist you.</p>
+                <a href="contact.php" style="display: inline-block; background-color: #dbc49d; color: #1a1b1c; padding: 14px 35px; text-decoration: none; border-radius: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s;">
+                    Entrer en relation
+                </a>
             </div>
         </section>
     </main>
