@@ -59,19 +59,19 @@ try {
             $nomClient = htmlspecialchars($info['name']);
             $sujet = "Bonne nouvelle ! Votre commande Nathpepper #" . $order_id . " a ete expediee !";
             
-            // Utilisation de Heredoc pour éviter tout conflit de guillemets avec le CSS inline
+            // Structure HTML/CSS inline aux couleurs sombres et dorées du site
             $html = <<<HTML
-                <h2 style="color: #333333; margin-top: 0; margin-bottom: 24px; font-size: 22px; font-weight: 600; font-family: Arial, sans-serif;">Bonjour {$nomClient},</h2>
-                <p style="margin-bottom: 18px; color: #555555; font-family: Arial, sans-serif;">Bonne nouvelle ! Votre colis a été soigneusement préparé par notre équipe et vient d'être remis à notre transporteur partenaire ! 🚚</p>
+                <h2 style="color: #dbc49d; margin-top: 0; margin-bottom: 24px; font-size: 22px; font-weight: 600; font-family: Arial, sans-serif;">Bonjour {$nomClient},</h2>
+                <p style="margin-bottom: 18px; color: #dddddd; font-family: Arial, sans-serif;">Bonne nouvelle ! Votre colis a été soigneusement préparé par notre équipe et vient d'être remis à notre transporteur partenaire ! 🚚</p>
                 
-                <div style="background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 20px; margin: 25px 0; font-family: Arial, sans-serif;">
+                <div style="background-color: #1f1f1f; border: 1px solid #2d2d2d; border-radius: 6px; padding: 20px; margin: 25px 0; font-family: Arial, sans-serif;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr>
-                            <td style="padding: 6px 0; font-size: 14px; color: #666666; font-family: Arial, sans-serif;">Numéro de commande :</td>
-                            <td style="padding: 6px 0; font-size: 14px; font-weight: bold; color: #b71c1c; text-align: right; font-family: Arial, sans-serif;">#{$order_id}</td>
+                            <td style="padding: 6px 0; font-size: 14px; color: #aaaaaa; font-family: Arial, sans-serif;">Numéro de commande :</td>
+                            <td style="padding: 6px 0; font-size: 14px; font-weight: bold; color: #e4cca2; text-align: right; font-family: Arial, sans-serif;">#{$order_id}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 6px 0; font-size: 14px; color: #666666; font-family: Arial, sans-serif;">Statut logistique :</td>
+                            <td style="padding: 6px 0; font-size: 14px; color: #aaaaaa; font-family: Arial, sans-serif;">Statut logistique :</td>
                             <td style="padding: 6px 0; text-align: right; font-family: Arial, sans-serif;">
                                 <span style="background-color: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; text-transform: uppercase; display: inline-block;">Expédiée</span>
                             </td>
@@ -79,13 +79,13 @@ try {
                     </table>
                 </div>
 
-                <p style="margin-bottom: 30px; color: #555555; font-family: Arial, sans-serif;">Vous pouvez suivre la progression de votre acheminement logistique et télécharger votre facture PDF officielle à tout moment depuis votre compte en ligne.</p>
+                <p style="margin-bottom: 30px; color: #dddddd; font-family: Arial, sans-serif;">Vous pouvez suivre la progression de votre acheminement logistique et télécharger votre facture PDF officielle à tout moment depuis votre compte en ligne.</p>
                 
                 <div style="text-align: center; margin: 35px 0;">
-                    <a href="http://localhost/nathpepper/mes-commandes.php" style="display: inline-block; background-color: #b71c1c; color: #ffffff; padding: 14px 30px; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; letter-spacing: 1px; box-shadow: 0 2px 4px rgba(183,28,28,0.2); text-transform: uppercase; font-family: Arial, sans-serif;">Suivre mon colis</a>
+                    <a href="http://localhost/nathpepper/mes-commandes.php" style="display: inline-block; background-color: #dbc49d; color: #1a1b1c; padding: 14px 30px; text-decoration: none; border-radius: 4px; font-weight: 700; font-size: 13px; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(219,196,157,0.15); text-transform: uppercase; font-family: Arial, sans-serif;">Suivre mon colis</a>
                 </div>
                 
-                <p style="margin-top: 30px; border-top: 1px solid #e0e0e0; padding-top: 20px; font-size: 14px; color: #666666; font-family: Arial, sans-serif;">Nous vous remercions pour votre confiance.<br><br>Sincèrement,<br><strong style="color: #333333;">L'équipe Nathpepper</strong></p>
+                <p style="margin-top: 30px; border-top: 1px solid #2d2d2d; padding-top: 20px; font-size: 14px; color: #8a8a8a; font-family: Arial, sans-serif;">Nous vous remercions pour votre confiance.<br><br>Sincèrement,<br><strong style="color: #dbc49d;">L'équipe Nathpepper</strong></p>
 HTML;
 
             // Envoi effectif de l'e-mail
