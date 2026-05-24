@@ -59,21 +59,21 @@ try {
             $nomClient = htmlspecialchars($info['name']);
             $sujet = "Bonne nouvelle ! Votre commande Nathpepper #" . $order_id . " a ete expediee !";
             
-            // Corps de l'e-mail avec charte graphique Nathpepper
+            // Corps de l'e-mail optimisé avec du pur CSS en ligne pour un rendu e-commerce premium
             $html = "
-                <h2>Bonjour " . $nomClient . ",</h2>
-                <p>Votre colis a été soigneusement préparé par notre équipe et vient d'être remis au transporteur ! 🚚</p>
-                <p>Votre commande <strong>#" . $order_id . "</strong> est désormais en route vers votre adresse.</p>
-                <p>Vous pouvez suivre l'évolution de votre colis et télécharger votre facture à tout moment depuis votre espace client.</p>
-                <br>
-                <p style='text-align: center;'>
-                    <a href='http://localhost/nathpepper/mes-commandes.php' style='display: inline-block; background-color: #b71c1c; color: white; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;'>Voir mes commandes</a>
-                </p>
-                <br>
-                <p>À très bientôt,<br>L'équipe Nathpepper</p>
+                <h2 style='color: #b71c1c; margin-top: 0; margin-bottom: 20px; font-size: 20px; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px; font-family: Arial, sans-serif;'>Bonjour " . $nomClient . ",</h2>
+                <p style='margin-bottom: 15px; font-family: Arial, sans-serif;'>Bonne nouvelle ! Votre colis a été soigneusement préparé par nos experts et vient d'être remis à notre transporteur partenaire ! 🚚</p>
+                <p style='margin-bottom: 15px; font-family: Arial, sans-serif;'>Votre commande référence <strong style='color: #b71c1c;'>#" . $order_id . "</strong> est désormais officiellement en route vers votre adresse de livraison.</p>
+                <p style='margin-bottom: 30px; font-family: Arial, sans-serif;'>Vous pouvez suivre la progression de votre acheminement logistique et télécharger votre facture PDF officielle à tout moment depuis votre tableau de bord personnel.</p>
+                
+                <div style='text-align: center; margin: 30px 0;'>
+                    <a href='http://localhost/nathpepper/mes-commandes.php' style='display: inline-block; background-color: #b71c1c; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 14px; letter-spacing: 0.5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-transform: uppercase; font-family: Arial, sans-serif;'>Suivre mon colis</a>
+                </div>
+                
+                <p style='margin-top: 25px; border-top: 1px solid #f5f5f5; padding-top: 15px; font-family: Arial, sans-serif;'>Nous vous remercions pour votre confiance et votre fidélité.<br><br>Sincèrement,<br><strong>L'équipe Nathpepper</strong></p>
             ";
 
-            // Envoi effectif de l'e-mail
+            // Envoi effectif (et écriture du fichier HTML simulé)
             envoyerEmailNathpepper($info['email'], $sujet, $html);
         }
     }
