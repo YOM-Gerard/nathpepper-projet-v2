@@ -7,8 +7,8 @@
         <ul class="nav-menu" id="nav-menu">
             <li><a href="index.php" class="nav-link">Accueil</a></li>
             <li><a href="produits.php" class="nav-link">Nos poivres</a></li>
-            <li><a href="index.php#story" class="nav-link">Notre Histoire</a></li>
-            <li><a href="index.php#contact" class="nav-link">Contact</a></li>
+            <li><a href="notre-histoire.php" class="nav-link">Notre Histoire</a></li>
+            <li><a href="contact.php" class="nav-link">Contact</a></li>
             
             <?php if (isset($_SESSION['user_id'])): ?>
                 <li><span class="nav-link" style="cursor: default; font-weight: 500;">👤 <?php echo htmlspecialchars($_SESSION['user_name']); ?></span></li>
