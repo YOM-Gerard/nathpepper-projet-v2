@@ -151,4 +151,50 @@ document.addEventListener('DOMContentLoaded', () => {
             saveAndRefreshCart();
         });
     }
+    // --- GESTION DU BOUTON COMMANDER AVEC VÉRIFICATION DES STOCKS ---
+    const checkoutBtn = document.getElementById('checkout-btn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+            if (window.cart.length === 0) {
+                alert("Votre panier est vide.");
+                return;
+            }
+
+            checkoutBtn.disabled = true;
+            checkoutBtn.textContent = "Vérification des stocks...";
+
+            // On envoie le panier complet au fichier PHP pour vérification
+            fetch('valider-commande.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ basket: window.cart })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Si les stocks sont OK, on redirige vers l'étape suivante (ex: paiement ou confirmation)
+                    alert("Stocks validés ! Passage à la commande...");
+                    // Optionnel : Tu peux vider le panier local ici si nécessaire
+                    window.cart = [];
+                    localStorage.setItem('cart', JSON.stringify(window.cart));
+                    updateCartCount();
+                    
+                    window.location.href = 'confirmation.php?order_id=' + data.order_id;
+                } else {
+                    // Si une erreur de stock ou de connexion survient, on affiche le message d'adresse précis renvoyé par PHP
+                    alert("⚠️ " + data.message);
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.textContent = "Commander";
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert("Une erreur est survenue lors de la validation.");
+                checkoutBtn.disabled = false;
+                checkoutBtn.textContent = "Commander";
+            });
+        });
+    }
 });
