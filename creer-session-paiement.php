@@ -4,8 +4,31 @@ session_start();
 // 1. Inclure la bibliothèque Stripe téléchargée
 require_once 'stripe-php/init.php';
 
-// 2. Ta clé secrète directement injectée pour le local (Remplace bien sk_test_... par TA vraie clé Stripe)
-$stripe_secret = 'sk_test_REMPLACE_MOI_PAR_TA_VRAIE_CLE';
+// 2. Décodeur maison de fichier .env (Version blindée contre les espaces/guillemets)
+if (file_exists(__DIR__ . '/.env')) {
+    $lines = file(__DIR__ . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        if (strpos(trim($line), '#') === 0) continue; // Ignore les commentaires
+        if (strpos($line, '=') !== false) {
+            list($name, $value) = explode('=', $line, 2);
+            
+            // Nettoyage complet : on enlève les espaces, les guillemets simples ou doubles
+            $clean_name = trim($name);
+            $clean_value = trim($value);
+            $clean_value = trim($clean_value, '"\''); 
+            
+            $_ENV[$clean_name] = $clean_value;
+        }
+    }
+}
+
+// 3. Récupération sécurisée de la clé
+$stripe_secret = $_ENV['STRIPE_SECRET_KEY'] ?? null;
+
+if (!$stripe_secret) {
+    http_response_code(500);
+    die(json_encode(['error' => 'Cle Stripe introuvable dans le fichier .env local.']));
+}
 
 \Stripe\Stripe::setApiKey($stripe_secret);
 
@@ -23,8 +46,7 @@ try {
     
     // On prépare la liste des produits au format exigé par Stripe
     foreach ($items as $item) {
-        // Sécurité : on s'assure que l'URL de l'image est valide ou absolue pour Stripe
-        $image_url = $item['image'];
+        $image_url = $item['image'] ?? 'images/default-pepper.jpg';
         if (strpos($image_url, 'http') !== 0) {
             $image_url = 'http://localhost/nathpepper/' . ltrim($image_url, '/');
         }
@@ -33,26 +55,24 @@ try {
             'price_data' => [
                 'currency' => 'eur',
                 'product_data' => [
-                    'name' => $item['name'],
-                    'images' => [$image_url], // URL propre pour Stripe
+                    'name' => $item['name'] ?? $item['nom'] ?? 'Poivre',
+                    'images' => [$image_url],
                 ],
-                'unit_amount' => round($item['price'] * 100), // Stripe calcule en centimes (15.00 € = 1500)
+                'unit_amount' => round(($item['price'] ?? $item['prix'] ?? 0) * 100),
             ],
-            'quantity' => $item['quantity'],
+            'quantity' => $item['quantity'] ?? $item['qte'] ?? 1,
         ];
     }
 
-    // 3. Création de la session de paiement Stripe Checkout
+    // Création de la session de paiement Stripe Checkout
     $session = \Stripe\Checkout\Session::create([
         'payment_method_types' => ['card'],
         'line_items' => $line_items,
         'mode' => 'payment',
-        // Les URLs où renvoyer le client après le paiement
         'success_url' => 'http://localhost/nathpepper/succes.php?session_id={CHECKOUT_SESSION_ID}',
         'cancel_url' => 'http://localhost/nathpepper/panier.php',
     ]);
 
-    // On renvoie l'URL de la page Stripe au JavaScript
     echo json_encode(['url' => $session->url]);
 
 } catch (Exception $e) {
