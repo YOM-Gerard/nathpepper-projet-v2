@@ -10,21 +10,17 @@ function updateCartCount() {
     const cartCountElement = document.getElementById('cart-count');
     if (!cartCountElement) return;
     
-    // On additionne les quantités de tous les articles du panier en utilisant window.cart
     const totalItems = window.cart.reduce((total, item) => total + (item.quantity || 1), 0);
     cartCountElement.textContent = totalItems;
 }
 
 // 2. La fonction qui s'enclenche quand on clique sur "Ajouter au panier"
 function addToCart(id, name, price, imageUrl) {
-    // On regarde si ce poivre est déjà dans le panier window.cart
     const existingProductIndex = window.cart.findIndex(item => item.name === name);
 
     if (existingProductIndex > -1) {
-        // Si oui, on augmente juste sa quantité de 1
         window.cart[existingProductIndex].quantity += 1;
     } else {
-        // Si non, on l'ajoute pour la première fois
         window.cart.push({
             id: id,
             name: name,
@@ -34,28 +30,22 @@ function addToCart(id, name, price, imageUrl) {
         });
     }
 
-    // On utilise la même clé 'cart' partout sur le site !
     localStorage.setItem('cart', JSON.stringify(window.cart));
-
-    // On met à jour le chiffre en haut de l'écran
     updateCartCount();
-    
-    // Si le modal du panier est ouvert, on rafraîchit son contenu visuel
     renderCartItems();
 }
 
 // ==========================================
-// 🛠️ ACTIONS DU PANIER VISUEL
+// 🛠️ ACTIONS DU PANIER VISUEL (MODAL)
 // ==========================================
 
-// 3. Fonction pour générer le HTML de la liste des produits dans le panier
+// 3. Fonction pour générer le HTML de la liste des produits dans le panier modal
 function renderCartItems() {
     const cartItemsContainer = document.getElementById('cart-items');
     const cartTotalElement = document.getElementById('cart-total');
     
-    if (!cartItemsContainer) return; // Sécurité si on n'est pas sur une page avec le modal panier
+    if (!cartItemsContainer) return;
     
-    // Si le panier est vide
     if (window.cart.length === 0) {
         cartItemsContainer.innerHTML = '<p class="empty-cart-msg">Votre panier est vide.</p>';
         if (cartTotalElement) cartTotalElement.textContent = '0,00 €';
@@ -65,7 +55,6 @@ function renderCartItems() {
     let htmlContent = '';
     let grandTotal = 0;
     
-    // On boucle sur chaque produit du panier pour fabriquer le HTML
     window.cart.forEach((item, index) => {
         const itemTotal = item.price * item.quantity;
         grandTotal += itemTotal;
@@ -95,10 +84,7 @@ function renderCartItems() {
         `;
     });
     
-    // On injecte le HTML généré dans le conteneur du modal
     cartItemsContainer.innerHTML = htmlContent;
-    
-    // On met à jour le total général affiché en bas
     if (cartTotalElement) {
         cartTotalElement.textContent = grandTotal.toFixed(2).replace('.', ',') + ' €';
     }
@@ -113,9 +99,8 @@ function changeQuantityPlus(index) {
 // 5. Diminuer la quantité (-1)
 function changeQuantityMinus(index) {
     window.cart[index].quantity -= 1;
-    
     if (window.cart[index].quantity <= 0) {
-        window.cart.splice(index, 1); // Retire le produit s'il tombe à 0
+        window.cart.splice(index, 1);
     }
     saveAndRefreshCart();
 }
@@ -130,20 +115,31 @@ function removeProductFromCart(index) {
 function saveAndRefreshCart() {
     localStorage.setItem('cart', JSON.stringify(window.cart));
     updateCartCount();
-    renderCartItems(); // Redessine instantanément l'intérieur du panier
+    renderCartItems();
+    
+    // CORRECTION COMPATIBILITÉ PANIER.PHP : Si la fonction d'affichage de panier-visuel.js existe, on l'exécute
+    if (typeof renderCartPage === 'function') {
+        renderCartPage();
+    } else if (typeof initCartPage === 'function') {
+        initCartPage();
+    } else {
+        // Fallback sécurisé si les structures diffèrent : on rafraîchit simplement le tableau principal
+        const tableBody = document.getElementById('cart-table-body');
+        if (tableBody) {
+            window.location.reload();
+        }
+    }
 }
 
 // 8. Préparation et écouteurs d'événements au chargement DOM
 document.addEventListener('DOMContentLoaded', () => {
     updateCartCount();
     
-    // On écoute le clic sur le bouton du panier dans le header pour rafraîchir la liste
     const cartHeaderBtn = document.getElementById('btn-cart') || document.querySelector('.nav-icon[id*="cart"]');
     if (cartHeaderBtn) {
         cartHeaderBtn.addEventListener('click', renderCartItems);
     }
     
-    // Événement pour le bouton "Vider le panier"
     const clearCartBtn = document.getElementById('clear-cart');
     if (clearCartBtn) {
         clearCartBtn.addEventListener('click', () => {
@@ -152,13 +148,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- LOGIQUE UNIVERSELLE DE COMMANDE & VÉRIFICATION DES STOCKS ---
-    // On cherche l'ID du modal OU l'ID de la page panier.php
+    // --- LOGIQUE UNIVERSELLE DE COMMANDE ---
     const checkoutBtn = document.getElementById('checkout-btn') || document.getElementById('checkout-button');
 
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', (e) => {
-            // Empêche tout comportement par défaut indésirable
             e.preventDefault();
 
             if (window.cart.length === 0) {
@@ -168,12 +162,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const originalText = checkoutBtn.textContent || checkoutBtn.value;
             
-            // Blocage du bouton le temps de la requête
             checkoutBtn.style.pointerEvents = 'none';
             checkoutBtn.style.opacity = '0.7';
             checkoutBtn.textContent = "Vérification des stocks...";
 
-            // Envoi asynchrone du panier complet à valider-commande.php
             fetch('valider-commande.php', {
                 method: 'POST',
                 headers: {
@@ -185,16 +177,11 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 if (data.success) {
                     alert("✓ Stocks validés ! Passage au paiement sécurisé...");
-                    
-                    // Vidage du panier local
                     window.cart = [];
                     localStorage.setItem('cart', JSON.stringify(window.cart));
                     updateCartCount();
-                    
-                    // Redirection dynamique vers ton tunnel de paiement
                     window.location.href = 'paiement.php?order_id=' + data.order_id;
                 } else {
-                    // Si rupture de stock détectée par valider-commande.php
                     alert("⚠️ " + data.message);
                     checkoutBtn.style.pointerEvents = 'auto';
                     checkoutBtn.style.opacity = '1';
@@ -210,3 +197,4 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+});
