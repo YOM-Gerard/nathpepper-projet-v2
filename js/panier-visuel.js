@@ -17,7 +17,7 @@ function afficherLePanierVisuel() {
     if (!window.cart || window.cart.length === 0) {
         if (contentWrapper) contentWrapper.style.display = 'none';
         if (emptyView) emptyView.style.display = 'block';
-        updateBadgeHeader(); // Force la mise à jour à 0
+        updateBadgeHeader();
         return;
     }
 
@@ -32,7 +32,6 @@ function afficherLePanierVisuel() {
 
     // On boucle sur chaque poivre du panier
     window.cart.forEach((item, index) => {
-        // Sécurité pour les noms de variables (gère 'price' ou 'prix')
         const prix = item.price || item.prix || 0;
         const nom = item.name || item.nom || 'Poivre inconnu';
         const image = item.image || item.img || 'images/default-pepper.jpg';
@@ -62,11 +61,10 @@ function afficherLePanierVisuel() {
         tableBody.appendChild(row);
     });
 
-    // Mise à jour des totaux en bas à droite
+    // Mise à jour des totaux
     if (subtotalEl) subtotalEl.textContent = `${totalGeneral.toFixed(2).replace('.', ',')} €`;
     if (totalEl) totalEl.textContent = `${totalGeneral.toFixed(2).replace('.', ',')} €`;
     
-    // Met à jour le badge header en même temps
     updateBadgeHeader();
 }
 
@@ -74,7 +72,6 @@ function afficherLePanierVisuel() {
 window.modifierQuantiteTableau = function(index, changement) {
     window.cart[index].quantity = (window.cart[index].quantity || 1) + changement;
     
-    // Si la quantité descend à 0, on supprime l'article
     if (window.cart[index].quantity <= 0) {
         window.cart.splice(index, 1);
     }
@@ -82,18 +79,17 @@ window.modifierQuantiteTableau = function(index, changement) {
     sauvegarderEtRafraichirTout();
 };
 
-// Fonction pour supprimer un produit si l'utilisateur clique sur "Supprimer"
+// Fonction pour supprimer un produit
 window.supprimerPoivre = function(index) {
-    window.cart.splice(index, 1); // Enlever du tableau
+    window.cart.splice(index, 1);
     sauvegarderEtRafraichirTout();
 };
 
 // Fonction outil pour mettre à jour le localStorage et redessiner l'écran
 function sauvegarderEtRafraichirTout() {
-    localStorage.setItem('cart', JSON.stringify(window.cart)); // Sauvegarder dans le navigateur
-    afficherLePanierVisuel(); // Re-dessiner l'écran du tableau
+    localStorage.setItem('cart', JSON.stringify(window.cart));
+    afficherLePanierVisuel();
     
-    // Si la fonction de mise à jour du compteur global (définie dans cart.js) existe, on la synchronise
     if (typeof updateCartCount === 'function') {
         updateCartCount();
     }
@@ -108,11 +104,11 @@ function updateBadgeHeader() {
     }
 }
 
-// 3. Lancement automatique de l'affichage au chargement de la page
+// 3. Lancement automatique au chargement du DOM
 document.addEventListener('DOMContentLoaded', () => {
     afficherLePanierVisuel();
 
-    // 4. Gestion du bouton de paiement avec DOUBLE SÉCURITÉ (Stocks puis Stripe)
+    // 4. Gestion du bouton de paiement avec DOUBLE SÉCURITÉ
     const checkoutBtn = document.getElementById('checkout-button');
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', () => {
@@ -124,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkoutBtn.textContent = "Vérification des stocks...";
             checkoutBtn.disabled = true;
 
-            // ÉTAPE A : On interroge notre barrière de sécurité PHP pour valider l'inventaire
+            // ÉTAPE A : Requête vers valider-commande.php
             fetch('valider-commande.php', {
                 method: 'POST',
                 headers: {
@@ -135,9 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(stockData => {
                 if (stockData.success) {
-                    // ÉTAPE B : Les stocks sont validés ! On enchaîne sur la création de session Stripe
+                    // ÉTAPE B : On enchaîne sur la création de session Stripe
                     checkoutBtn.textContent = "Redirection sécurisée...";
-                    
                     return fetch('creer-session-paiement.php', {
                         method: 'POST',
                         headers: {
@@ -146,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({ items: window.cart })
                     });
                 } else {
-                    // Rupture de stock détectée ! On lève une erreur pour couper la chaîne du paiement
                     throw new Error(stockData.message);
                 }
             })
@@ -155,11 +149,9 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(session => {
                 if (session && session.url) {
-                    // On vide le panier local avant de quitter le site vers Stripe
                     window.cart = [];
                     localStorage.setItem('cart', JSON.stringify(window.cart));
-                    
-                    window.location.href = session.url; // Décollage vers Stripe !
+                    window.location.href = session.url;
                 } else if (session) {
                     alert("Erreur Stripe : " + (session.error || "Impossible d'ouvrir la page de paiement."));
                     checkoutBtn.textContent = "Procéder au paiement sécurisé";
@@ -167,5 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(error => {
-                // Interception globale (Ruptures de stock ou plantages réseau)
                 alert("⚠️ " + error.message);
+                checkoutBtn.textContent = "Procéder au paiement sécurisé";
+                checkoutBtn.disabled = false;
+            });
+        });
+    }
+});
