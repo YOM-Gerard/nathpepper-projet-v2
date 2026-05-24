@@ -3,7 +3,6 @@ session_start();
 require_once 'includes/db.php'; // Connexion $pdo
 
 // 1. SÉCURITÉ : On vérifie si l'utilisateur est connecté ET s'il est admin
-// (Ici on vérifie la colonne is_admin, ou tu peux ajouter : && $_SESSION['user_email'] === 'admin@nathpepper.com')
 if (!isset($_SESSION['user_id'])) {
     header('Location: connexion.php');
     exit();
@@ -15,7 +14,6 @@ $stmtCheck->execute(['id' => $_SESSION['user_id']]);
 $user = $stmtCheck->fetch(PDO::FETCH_ASSOC);
 
 if (!$user || $user['is_admin'] != 1) {
-    // Si l'utilisateur n'est pas admin, on le jette poliment vers l'accueil
     header('Location: index.php');
     exit();
 }
@@ -30,8 +28,8 @@ try {
     ");
     $all_orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Calcul du Chiffre d'Affaires total (uniquement sur les commandes payées)
-    $stmtCA = $pdo->query("SELECT SUM(total_amount) as total_ca FROM orders WHERE status = 'paid'");
+    // Calcul du Chiffre d'Affaires total (uniquement sur les commandes encaissées/traitées)
+    $stmtCA = $pdo->query("SELECT SUM(total_amount) as total_ca FROM orders WHERE status IN ('paid', 'processing', 'shipped', 'delivered')");
     $ca_data = $stmtCA->fetch(PDO::FETCH_ASSOC);
     $chiffre_affaires = $ca_data['total_ca'] ?? 0;
 
@@ -47,19 +45,20 @@ try {
     <title>Dashboard Admin - Nathpepper</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .admin-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; family: 'Inter', sans-serif; }
+        .admin-container { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; font-family: 'Inter', sans-serif; }
+        .admin-nav { display: flex; gap: 15px; margin-bottom: 2rem; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+        .admin-nav a { text-decoration: none; color: #555; font-weight: 500; }
+        .admin-nav a.active { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 2rem; }
         .stat-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.01); }
         .stat-number { font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-top: 5px; }
         .admin-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e0e0e0; margin-top: 1rem; }
-        .admin-table th, .admin-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        .admin-table th, .admin-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #e0e0e0; vertical-align: middle; }
         .admin-table th { background: #f5f5f5; font-weight: 600; color: #333; }
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 500; }
-        .status-paid { background-color: #e8f5e9; color: #2e7d32; }
-        .status-pending { background-color: #fff3e0; color: #ef6c00; }
         .items-list { font-size: 0.85rem; color: #555; margin: 0; padding-left: 15px; }
+        .status-select { padding: 6px 10px; border-radius: 4px; border: 1px solid #ccc; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.85rem; background-color: #fff; cursor: pointer; transition: all 0.3s ease; }
     </style>
 </head>
 <body>
@@ -70,6 +69,11 @@ try {
         <div style="height: 120px; width: 100%;"></div>
 
         <section class="admin-container">
+            <div class="admin-nav">
+                <a href="admin.php" class="active">📋 Gestion des Commandes</a>
+                <a href="admin-produits.php">🌶️ Gestion du Catalogue</a>
+            </div>
+
             <h2 class="section-title" style="text-align: left; margin-bottom: 0.5rem;">Panneau d'Administration</h2>
             <p style="margin-bottom: 2rem; color: #666;">Gestion globale des ventes et de l'activité Nathpepper.</p>
 
@@ -97,7 +101,7 @@ try {
                             <th>Client</th>
                             <th>Articles commandés</th>
                             <th>Montant</th>
-                            <th>Statut</th>
+                            <th>Statut logistique</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -121,7 +125,6 @@ try {
                                     <td>
                                         <ul class="items-list">
                                         <?php
-                                        // On va chercher les produits de cette commande
                                         $stmtItems = $pdo->prepare("SELECT * FROM order_items WHERE order_id = :order_id");
                                         $stmtItems->execute(['order_id' => $order['id']]);
                                         $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
@@ -133,9 +136,13 @@ try {
                                     </td>
                                     <td><strong><?php echo number_format($order['total_amount'], 2, ',', ' '); ?> €</strong></td>
                                     <td>
-                                        <span class="status-badge <?php echo $order['status'] === 'paid' ? 'status-paid' : 'status-pending'; ?>">
-                                            <?php echo $order['status'] === 'paid' ? 'Payée' : 'En attente'; ?>
-                                        </span>
+                                        <select class="status-select" data-order-id="<?php echo $order['id']; ?>">
+                                            <option value="pending" <?php echo $order['status'] === 'pending' ? 'selected' : ''; ?>>⏳ En attente</option>
+                                            <option value="paid" <?php echo $order['status'] === 'paid' ? 'selected' : ''; ?>>📦 Payée (À préparer)</option>
+                                            <option value="processing" <?php echo $order['status'] === 'processing' ? 'selected' : ''; ?>>🛠️ En préparation</option>
+                                            <option value="shipped" <?php echo $order['status'] === 'shipped' ? 'selected' : ''; ?>>🚚 Expédiée</option>
+                                            <option value="delivered" <?php echo $order['status'] === 'delivered' ? 'selected' : ''; ?>>✓ Livrée</option>
+                                        </select>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -149,5 +156,23 @@ try {
 
     <?php require_once 'includes/footer.php'; ?>
 
-</body>
-</html>
+    <script>
+    document.querySelectorAll('.status-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const orderId = this.getAttribute('data-order-id');
+            const newStatus = this.value;
+
+            // Signal visuel de chargement
+            this.style.borderColor = '#0d47a1';
+            this.style.background = '#e3f2fd';
+
+            fetch('modifier-statut-commande.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ order_id: orderId, status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Confirmation verte éphémère
+                    this
