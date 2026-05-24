@@ -93,7 +93,58 @@ HTML;
         }
     }
 
-    echo json_encode(['success' => true, 'message' => 'Statut mis à jour et e-mail envoyé avec succès !']);
-} catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Erreur BDD : ' . $e->getMessage()]);
-}
+    // 3. DÉCLENCHEMENT DU MAIL DE CONFIRMATION D'ACHAT
+    if ($new_status === 'paid') {
+        // Récupérer les informations du client et de la commande
+        $stmtInfo = $pdo->prepare("
+            SELECT orders.id, orders.total_amount, users.email, users.name 
+            FROM orders 
+            LEFT JOIN users ON orders.user_id = users.id 
+            WHERE orders.id = :id
+        ");
+        $stmtInfo->execute(['id' => $order_id]);
+        $info = $stmtInfo->fetch(PDO::FETCH_ASSOC);
+
+        if ($info && !empty($info['email'])) {
+            $nomClient = htmlspecialchars($info['name']);
+            $totalCommande = number_format($info['total_amount'], 2, ',', ' ') . ' €';
+            $sujet = "Confirmation de votre commande Nathpepper #" . $order_id . " !";
+
+            // Récupérer les articles commandés pour les lister dans le mail
+            $stmtItems = $pdo->prepare("SELECT * FROM order_items WHERE order_id = :order_id");
+            $stmtItems->execute(['order_id' => $order_id]);
+            $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+
+            // Génération des lignes du tableau HTML pour les produits
+            $lignesProduits = "";
+            foreach ($items as $item) {
+                $nomProd = htmlspecialchars($item['product_name']);
+                $qte = intval($item['quantity']);
+                $sousTotal = number_format($item['price'] * $qte, 2, ',', ' ') . ' €';
+
+                $lignesProduits .= <<<HTML
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #2d2d2d; color: #dddddd; font-family: Arial, sans-serif;">{$nomProd} <span style="color: #aaaaaa; font-size: 13px;">(x{$qte})</span></td>
+                        <td style="padding: 10px; border-bottom: 1px solid #2d2d2d; color: #dddddd; text-align: right; font-family: Arial, sans-serif;">{$sousTotal}</td>
+                    </tr>
+HTML;
+            }
+
+            // Corps du mail de confirmation d'achat (Thème sombre & doré)
+            $html = <<<HTML
+                <h2 style="color: #dbc49d; margin-top: 0; margin-bottom: 20px; font-size: 22px; font-weight: 600; font-family: Arial, sans-serif;">Merci pour votre commande, {$nomClient} !</h2>
+                <p style="margin-bottom: 25px; color: #dddddd; font-family: Arial, sans-serif;">Nous avons le plaisir de vous confirmer que votre paiement a bien été validé. Nos experts préparent d'ores et déjà vos précieux poivres rares avec le plus grand soin. 🌿✨</p>
+                
+                <h3 style="color: #e4cca2; font-size: 15px; margin-bottom: 12px; font-family: Arial, sans-serif; text-transform: uppercase; letter-spacing: 1px;">Récapitulatif de vos achats</h3>
+                
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 25px; font-family: Arial, sans-serif; background-color: #1f1f1f; border-radius: 6px; overflow: hidden; border: 1px solid #2d2d2d;">
+                    <thead>
+                        <tr style="background-color: #18191b;">
+                            <th style="padding: 12px 10px; text-align: left; color: #dbc49d; font-size: 13px; font-weight: bold; border-bottom: 1px solid #2d2d2d; font-family: Arial, sans-serif;">Produit</th>
+                            <th style="padding: 12px 10px; text-align: right; color: #dbc49d; font-size: 13px; font-weight: bold; border-bottom: 1px solid #2d2d2d; font-family: Arial, sans-serif;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {$lignesProduits}
+                        <tr style="background-color: #18191b;">
+                            <td style="padding: 15px 10px; font-weight: bold
