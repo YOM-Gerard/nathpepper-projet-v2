@@ -1,25 +1,8 @@
-// Script principal - Gestion de la navigation et interactions générales
+// Script principal - Interactions générales (Navigation mobile déportée dans header.php)
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Gestion du menu mobile
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu = document.getElementById('nav-menu');
-    
-    if (navToggle && navMenu) {
-        navToggle.addEventListener('click', function() {
-            navMenu.classList.toggle('active');
-            navToggle.classList.toggle('active');
-        });
-        
-        // Fermer le menu mobile lors du clic sur un lien
-        const navLinks = document.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                navMenu.classList.remove('active');
-                navToggle.classList.remove('active');
-            });
-        });
-    }
+    // NOTE : La gestion du menu mobile a été centralisée de manière autonome 
+    // directement dans includes/header.php pour éviter les conflits d'affichage.
     
     // Gestion du scroll smooth pour les liens d'ancrage
     const anchorLinks = document.querySelectorAll('a[href^="#"]');
@@ -158,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const platform = this.textContent.toLowerCase();
             showNotification(`Redirection vers ${platform}...`, 'info');
             
-            // Dans une vraie application, on redirigerait vers les vrais liens sociaux
             setTimeout(() => {
                 showNotification(`Lien ${platform} non configuré pour la démo`, 'info');
             }, 1000);
@@ -202,13 +184,11 @@ function isValidEmail(email) {
 // Fonction pour gérer les erreurs globales
 window.addEventListener('error', function(e) {
     console.error('Erreur JavaScript:', e.error);
-    // En production, on pourrait envoyer l'erreur à un service de monitoring
 });
 
 // Fonction pour gérer les promesses rejetées
 window.addEventListener('unhandledrejection', function(e) {
     console.error('Promesse rejetée:', e.reason);
-    // En production, on pourrait envoyer l'erreur à un service de monitoring
 });
 
 // Performance monitoring (optionnel)
@@ -218,15 +198,5 @@ if ('performance' in window) {
             const perfData = performance.getEntriesByType('navigation')[0];
             console.log('Temps de chargement:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
         }, 0);
-    });
-}
-
-// Service Worker registration (pour une future PWA)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        // Décommenté quand un service worker sera créé
-        // navigator.serviceWorker.register('/sw.js')
-        //     .then(registration => console.log('SW registered'))
-        //     .catch(error => console.log('SW registration failed'));
     });
 }
