@@ -43,6 +43,13 @@ try {
         throw new Exception('Le panier est vide.');
     }
 
+    // DÉTECTION DYNAMIQUE DE L'URL DE BASE (Local vs Production)
+    if ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_NAME'] === '127.0.0.1') {
+        $baseUrl = 'http://localhost/nathpepper/';
+    } else {
+        $baseUrl = 'https://nathpepper.com/'; // Ton nom de domaine officiel sécurisé
+    }
+
     $line_items = [];
     $total_amount = 0; // On initialise le calcul du montant total pour notre BDD
     
@@ -56,7 +63,8 @@ try {
 
         $image_url = $item['image'] ?? 'images/default-pepper.jpg';
         if (strpos($image_url, 'http') !== 0) {
-            $image_url = 'http://localhost/nathpepper/' . ltrim($image_url, '/');
+            // Utilisation de l'URL dynamique calculée pour les images produits envoyées à Stripe
+            $image_url = $baseUrl . ltrim($image_url, '/');
         }
 
         $line_items[] = [
@@ -72,20 +80,20 @@ try {
         ];
     }
 
-    // Création de la session de paiement Stripe Checkout
+    // Création de la session de paiement Stripe Checkout avec URLs dynamiques
     $session = \Stripe\Checkout\Session::create([
         'payment_method_types' => ['card'],
         'line_items' => $line_items,
         'mode' => 'payment',
-        'success_url' => 'http://localhost/nathpepper/succes.php?session_id={CHECKOUT_SESSION_ID}',
-        'cancel_url' => 'http://localhost/nathpepper/panier.php',
+        'success_url' => $baseUrl . 'succes.php?session_id={CHECKOUT_SESSION_ID}',
+        'cancel_url' => $baseUrl . 'panier.php',
     ]);
 
     // ==========================================
     // 🗄️ SAUVEGARDE EN BASE DE DONNÉES (PENDING)
     // ==========================================
     
-    // MODIFICATION : On vérifie si l'acheteur est connecté à un compte utilisateur
+    // On vérifie si l'acheteur est connecté à un compte utilisateur
     $user_id = isset($_SESSION['user_id']) ? intval($_SESSION['user_id']) : null;
 
     // On démarre une transaction PDO pour s'assurer que tout s'enregistre ou rien du tout (évite les bugs)
@@ -102,7 +110,7 @@ try {
     // On récupère l'ID numérique généré par MySQL pour cette commande
     $order_id = $pdo->lastInsertId();
 
-    // 2. Insertion de chaque produit dans la table de détails 'order_items'
+    // Insertion de chaque produit dans la table de détails 'order_items'
     $stmtItem = $pdo->prepare("INSERT INTO order_items (order_id, product_id, product_name, price, quantity) VALUES (:order_id, :product_id, :p_name, :price, :qty)");
     
     foreach ($items as $item) {
