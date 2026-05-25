@@ -16,9 +16,9 @@ if (session_status() === PHP_SESSION_NONE) {
             <li><a href="contact.php" class="nav-link">Contact</a></li>
             
             <?php if (isset($_SESSION['user_id'])): ?>
-                <li><span class="nav-link" style="cursor: default; font-weight: 500;">👤 <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Client', ENT_QUOTES, 'UTF-8'); ?></span></li>
+                <li><span class="nav-link user-profile-name" style="cursor: default; font-weight: 500; letter-spacing: 1px;">Compte : <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Client', ENT_QUOTES, 'UTF-8'); ?></span></li>
                 <li><a href="mes-commandes.php" class="nav-link">Mes Commandes</a></li>
-                <li><a href="deconnexion.php" class="nav-link" style="color: #f44336;">Déconnexion</a></li>
+                <li><a href="deconnexion.php" class="nav-link" style="color: #c62828 !important; font-weight: 500;">Déconnexion</a></li>
             <?php else: ?>
                 <li><a href="connexion.php" class="nav-link">Connexion</a></li>
             <?php endif; ?>
@@ -39,13 +39,13 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <style>
 @media (max-width: 768px) {
-    /* 1. Le bouton Burger épuré (Lignes plus élégantes et minimalistes) */
+    /* 1. Bouton Burger Minimaliste */
     .nav-toggle {
         display: flex !important;
         flex-direction: column;
         justify-content: space-between;
         width: 24px;
-        height: 16px;
+        height: 15px;
         background: none !important;
         border: none !important;
         cursor: pointer;
@@ -55,13 +55,13 @@ if (session_status() === PHP_SESSION_NONE) {
 
     .burger-bar {
         width: 100%;
-        height: 2px; /* Lignes affinées pour un rendu haut de gamme */
+        height: 2px;
         background-color: #1a1b1c !important;
         border-radius: 1px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* 2. Le rideau mobile effet "Glassmorphism" (Flou artistique Premium) */
+    /* 2. Rideau Mobile Compacté (Ajusté pour que TOUT tienne à l'écran) */
     .nav-menu {
         display: flex !important; 
         flex-direction: column !important;
@@ -73,25 +73,21 @@ if (session_status() === PHP_SESSION_NONE) {
         width: 100% !important;
         height: 100vh !important;
         
-        /* Fond blanc translucide haut de gamme */
         background-color: rgba(255, 255, 255, 0.98) !important;
         backdrop-filter: blur(15px) !important;
         -webkit-backdrop-filter: blur(15px) !important;
         
         margin: 0 !important;
-        padding: 2rem !important;
-        gap: 25px !important;
+        padding: 1.5rem !important;
+        gap: 15px !important; /* Espacement réduit entre les blocs de liens */
         
-        /* Masqué avec opacité à 0 et léger décalage vers le haut */
         opacity: 0 !important;
         visibility: hidden !important;
-        transform: translateY(-20px) !important;
-        transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s !important;
+        transform: translateY(-10px) !important;
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s !important;
         z-index: 2000000 !important;
-        box-shadow: none !important;
     }
 
-    /* Déploiement en douceur lors de l'activation */
     .nav-menu.nath-menu-open {
         opacity: 1 !important;
         visibility: visible !important;
@@ -103,53 +99,45 @@ if (session_status() === PHP_SESSION_NONE) {
         text-align: center !important;
         margin: 0 !important;
         list-style: none !important;
-        opacity: 0;
-        transform: translateY(10px);
-        transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    /* Animation d'apparition séquentielle des liens */
-    .nav-menu.nath-menu-open li {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    
-    /* Décalage temporel des animations pour chaque lien */
-    .nav-menu.nath-menu-open li:nth-child(1) { transition-delay: 0.1s; }
-    .nav-menu.nath-menu-open li:nth-child(2) { transition-delay: 0.15s; }
-    .nav-menu.nath-menu-open li:nth-child(3) { transition-delay: 0.2s; }
-    .nav-menu.nath-menu-open li:nth-child(4) { transition-delay: 0.25s; }
-    .nav-menu.nath-menu-open li:nth-child(5) { transition-delay: 0.3s; }
-    .nav-menu.nath-menu-open li:nth-child(6) { transition-delay: 0.35s; }
-
-    /* 3. Typographie des liens (Style Luxe Épuré) */
+    /* 3. Typographie Affinée (Moins grosse, plus équilibrée) */
     .nav-menu li a, .nav-menu li span {
         display: inline-block !important;
-        font-family: 'Playfair Display', serif !important; /* Utilisation de ta police signature */
-        font-size: 1.8rem !important;
+        font-family: 'Playfair Display', serif !important;
+        font-size: 1.35rem !important; /* Taille descendue de 1.8rem à 1.35rem */
         font-weight: 400 !important;
         color: #1a1b1c !important;
         text-decoration: none !important;
-        padding: 8px 0 !important;
-        letter-spacing: 1px;
-        transition: color 0.3s ease !important;
+        padding: 5px 0 !important; /* Moins de padding pour gagner de la hauteur */
+        letter-spacing: 0.5px;
     }
 
-    /* Teinte subtile au toucher */
+    /* Style spécifique pour la ligne "Compte : Gilbert" */
+    .nav-menu li span.user-profile-name {
+        font-size: 1.1rem !important;
+        color: #757575 !important;
+        border-top: 1px solid #eeeeee;
+        margin-top: 5px;
+        padding-top: 15px !important;
+        width: 60%;
+    }
+
+    /* Action tactile */
     .nav-menu li a:active {
-        color: #8d6e63 !important; /* Couleur chaude d'épice douce */
+        color: #8d6e63 !important;
     }
 
-    /* 4. Animation de la croix (X) minimaliste */
+    /* Croix de fermeture */
     .nav-toggle.open .burger-bar:nth-child(1) {
-        transform: translateY(7px) rotate(45deg) !important;
+        transform: translateY(6.5px) rotate(45deg) !important;
     }
     .nav-toggle.open .burger-bar:nth-child(2) {
         opacity: 0 !important;
         transform: translateX(10px) !important;
     }
     .nav-toggle.open .burger-bar:nth-child(3) {
-        transform: translateY(-7px) rotate(-45deg) !important;
+        transform: translateY(-6.5px) rotate(-45deg) !important;
     }
 }
 </style>
@@ -164,13 +152,10 @@ if (session_status() === PHP_SESSION_NONE) {
             toggleBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                
-                // Utilisation de notre classe isolée pour éviter les conflits JS
                 menuList.classList.toggle('nath-menu-open');
                 toggleBtn.classList.toggle('open');
             });
 
-            // Fermeture intelligente si clic en dehors du rideau ouvert
             document.addEventListener('click', function(e) {
                 if (!menuList.contains(e.target) && !toggleBtn.contains(e.target)) {
                     menuList.classList.remove('nath-menu-open');
