@@ -13,26 +13,37 @@ require_once 'includes/db.php';
     <link rel="stylesheet" href="styles/components.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #202020; color: #dddddd; font-family: 'Inter', sans-serif; }
+        /* Fond de page blanc écru lumineux */
+        body { background-color: #fbf9f6 !important; color: #1a1b1c; font-family: 'Inter', sans-serif; }
+        
         .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; max-width: 1000px; margin: 0 auto; padding: 4rem 1.5rem; }
-        .contact-title { font-family: 'Playfair Display', serif; color: #dbc49d; font-size: 2.5rem; margin-bottom: 1.5rem; }
+        
+        .contact-title { font-family: 'Playfair Display', serif; color: #1a1b1c; font-size: 2.5rem; margin-bottom: 1.5rem; }
+        
         .info-block { margin-bottom: 2rem; }
-        .info-block h4 { color: #e4cca2; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
-        .info-block p { color: #bbbbbb; line-height: 1.6; margin: 0; }
+        .info-block h4 { color: #8d6e63; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
+        .info-block p { color: #444444; line-height: 1.6; margin: 0; }
         
-        /* Harmonisation de la boîte : angles à 2px et ajustements premium */
-        .contact-form { background: #1a1b1c; border: 1px solid #2d2d2d; padding: 2.5rem; border-radius: 2px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        /* Formulaire blanc épuré posé sur le fond écru */
+        .contact-form { background: #ffffff; border: 1px solid #eae5dc; padding: 2.5rem; border-radius: 2px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
         .form-group { margin-bottom: 1.5rem; text-align: left; }
-        .form-group label { display: block; font-size: 0.85rem; color: #aaaaaa; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-group label { display: block; font-size: 0.85rem; color: #1a1b1c; margin-bottom: 0.5rem; font-weight: 500; }
         
-        /* box-sizing pour sécuriser la largeur mobile */
-        .form-control { width: 100%; padding: 12px; background: #202020; border: 1px solid #3d3d3d; border-radius: 2px; color: #ffffff; font-family: inherit; font-size: 0.95rem; box-sizing: border-box; }
-        .form-control:focus { border-color: #dbc49d; outline: none; }
+        /* Inputs clairs aux contours fins */
+        .form-control { width: 100%; padding: 12px; background: #fbf9f6; border: 1px solid #eae5dc; border-radius: 2px; color: #1a1b1c; font-family: inherit; font-size: 0.95rem; box-sizing: border-box; }
+        .form-control:focus { border-color: #1a1b1c; outline: none; }
         
-        /* Bouton Or épuré (angles droits, étiré et lettrage espacé) */
-        .btn-gold { background-color: #dbc49d; color: #1a1b1c; border: 1px solid #dbc49d; width: 100%; padding: 14px; border-radius: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: all 0.2s ease-in-out; }
-        .btn-gold:hover { background-color: #e4cca2; border-color: #e4cca2; }
-        .btn-gold:active { background-color: #1a1b1c; color: #dbc49d; }
+        /* Bouton noir mat "Minimaliste Luxe" */
+        .btn-gold { background-color: #1a1b1c; color: #ffffff; border: 1px solid #1a1b1c; width: 100%; padding: 14px; border-radius: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; cursor: pointer; transition: all 0.2s ease-in-out; }
+        .btn-gold:hover { background-color: #444444; border-color: #444444; }
+        .btn-gold:active { background-color: #ffffff; color: #1a1b1c; }
+
+        /* Le header reste blanc pur comme sur produits.php */
+        .header {
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #eae5dc !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02) !important;
+        }
 
         /* Ajustements d'aération sur smartphone */
         @media (max-width: 768px) { 
@@ -52,7 +63,7 @@ require_once 'includes/db.php';
         <div class="contact-grid">
             <div>
                 <h1 class="contact-title">Entrer en Relation</h1>
-                <p style="color: #cccccc; line-height: 1.7; margin-bottom: 3rem; font-weight: 300;">Vous êtes un chef cuisinier, un amateur exigeant ou vous avez simplement une question sur l'une de nos variétés ? Notre service conciergerie est à votre entière disposition.</p>
+                <p style="color: #444444; line-height: 1.7; margin-bottom: 3rem; font-weight: 300;">Vous êtes un chef cuisinier, un amateur exigeant ou vous avez simplement une question sur l'une de nos variétés ? Notre service conciergerie est à votre entière disposition.</p>
                 
                 <div class="info-block">
                     <h4>Le Comptoir Parisien</h4>

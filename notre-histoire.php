@@ -21,39 +21,36 @@ require_once 'includes/db.php';
         /* Titre en noir profond très chic */
         .story-title { font-family: 'Playfair Display', serif; color: #1a1b1c; font-size: 3rem; margin-bottom: 2rem; letter-spacing: 2px; }
         
-        /* Accroche dans une teinte chaude d'épice douce ou cannelle */
+        /* Accroche dans une teinte chaude d'épice douce */
         .story-lead { font-size: 1.2rem; color: #8d6e63; font-style: italic; line-height: 1.8; margin-bottom: 3rem; }
         
         /* Texte de lecture sombre pour un confort optimal sur le fond écru */
         .story-text { font-size: 1.05rem; line-height: 1.9; color: #333333; text-align: justify; margin-bottom: 2rem; }
         
-        /* Encadré de surbrillance épuré calqué sur ton nouveau design */
+        /* Encadré de surbrillance épuré */
         .story-highlight { 
             border-left: 3px solid #1a1b1c; 
             border-right: 3px solid #1a1b1c; 
             padding: 1.5rem; 
             margin: 3rem 0; 
-            background: #f2ede4; /* Un ton écru légèrement plus prononcé pour contraster */
+            background: #f2ede4; 
             color: #1a1b1c; 
             font-weight: 500; 
             border-radius: 2px;
         }
 
-        /* Le header s'intègre de façon transparente dans l'écru */
+        /* Le header reste blanc pur comme sur produits.php */
         .header {
-            background-color: #fbf9f6 !important;
+            background-color: #ffffff !important;
             border-bottom: 1px solid #eae5dc !important;
-            box-shadow: none !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02) !important;
         }
 
         /* ─── AJUSTEMENTS ERGONOMIQUES MOBILE (SOUS 768PX) ─── */
         @media (max-width: 768px) {
             .story-title { font-size: 2.2rem !important; margin-bottom: 1.5rem !important; }
             .story-lead { font-size: 1.1rem !important; margin-bottom: 2rem !important; }
-            
-            /* Alignement à gauche sur mobile pour éviter les grands espaces blancs du justify */
             .story-text { text-align: left !important; font-size: 1rem !important; line-height: 1.8 !important; }
-            
             .story-highlight { padding: 1.2rem !important; margin: 2rem 0 !important; font-size: 0.95rem !important; }
         }
     </style>
