@@ -1,3 +1,20 @@
+/* Responsive Design */
+
+/* Large screens */
+@media (max-width: 1200px) {
+    .container {
+        padding: 0 30px;
+    }
+    
+    .hero-content {
+        margin-right: 1rem;
+    }
+    
+    .brand-content {
+        gap: 2rem;
+    }
+}
+
 /* Tablets */
 @media (max-width: 768px) {
     /* ==========================================================================
@@ -17,7 +34,7 @@
         padding: 0;
         box-sizing: border-box;
         margin-right: 15px;
-        z-index: 10000;
+        z-index: 2000000 !important; 
     }
 
     /* Les 3 lignes horizontales du burger */
@@ -32,13 +49,13 @@
     /* 2. Menu rideau déroulant vertical */
     .nav-menu {
         position: fixed !important;
-        top: 100px; /* Aligné sous la hauteur de ton header */
-        left: -100% !important; /* Masqué à gauche par défaut */
+        top: 0 !important; 
+        left: -100% !important; 
         width: 100% !important;
-        height: calc(100vh - 100px);
+        height: 100vh !important; 
         background-color: var(--white, #ffffff) !important;
         flex-direction: column !important;
-        justify-content: flex-start !important;
+        justify-content: center !important; 
         align-items: center !important;
         padding: 3rem 1.5rem !important;
         margin: 0 !important;
@@ -46,7 +63,7 @@
         gap: 1.5rem !important;
         transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: var(--shadow);
-        z-index: 9999 !important;
+        z-index: 1999999 !important; 
     }
     
     /* Déploiement du rideau via la classe active injectée par JS */
@@ -62,8 +79,8 @@
 
     .nav-menu li a, .nav-menu li span {
         display: block;
-        font-size: 1.25rem !important;
-        padding: 8px 0;
+        font-size: 1.4rem !important; 
+        padding: 10px 0;
         text-decoration: none;
     }
     
@@ -163,3 +180,86 @@
         justify-content: center;
     }
 }
+
+/* Mobile phones */
+@media (max-width: 480px) {
+    /* Container */
+    .container {
+        padding: 0 15px;
+    }
+    
+    /* Navigation */
+    .nav-container {
+        padding: 0 15px;
+    }
+    
+    .logo {
+        height: 40px;
+    }
+    
+    .nav-actions {
+        gap: 0.5rem;
+    }
+    
+    /* Hero */
+    .hero {
+        padding: 100px 15px 40px;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    /* Typography */
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.8rem;
+    }
+    
+    h3 {
+        font-size: 1.4rem;
+    }
+    
+    /* Sections */
+    .products-section, .brand-section, .contact-section {
+        padding: 40px 0;
+    }
+    
+    /* Products */
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .product-card {
+        margin: 0 auto;
+        max-width: 350px;
+    }
+    
+    /* ─── ALIGNEMENT REVISITÉ PRIX + GRAMMES + BOUTON ─── */
+    .product-meta-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin-top: 15px !important;
+        gap: 10px !important;
+    }
+
+    .product-price-weight {
+        display: flex !important;
+        align-items: baseline !important;
+        gap: 6px !important;
+        text-align: left !important;
+    }
+
+    .product-price {
+        font-size: 1.2rem !important;
+        font
