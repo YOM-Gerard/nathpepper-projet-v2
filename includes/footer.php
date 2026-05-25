@@ -18,8 +18,8 @@
                 <div class="footer-section">
                     <h4>Légal</h4>
                     <ul>
-                        <li><a href="#" id="mentions-legales">Mentions légales</a></li>
-                        <li><a href="#" id="cgv">CGV</a></li>
+                        <li><a href="mentions-legales.php">Mentions Légales</a></li>
+                        <li><a href="cgv.php">Conditions Générales de Vente</a></li>
                         <li><a href="#" id="confidentialite">Confidentialité</a></li>
                     </ul>
                 </div>
