@@ -107,23 +107,28 @@ session_start();
         <div style="height: 140px; width: 100%;"></div>
 
         <div class="cart-page-container">
-            <h1 class="section-title" style="text-align: left; margin-bottom: 2rem;">Votre Panier</h1>
+            <h1 class="section-title" style="text-align: left; margin-bottom: 2rem;">
+                Votre Panier <?php echo isset($_SESSION['user_name']) ? '- ' . htmlspecialchars($_SESSION['user_name'], ENT_QUOTES, 'UTF-8') : ''; ?>
+            </h1>
 
             <div id="cart-content-wrapper">
-                <table class="cart-table">
-                    <thead>
-                        <tr>
-                            <th>Produit</th>
-                            <th>Nom</th>
-                            <th>Prix</th>
-                            <th>Quantité</th>
-                            <th>Total</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cart-table-body">
-                        </tbody>
-                </table>
+                
+                <div class="table-responsive" style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 20px;">
+                    <table class="cart-table">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Nom</th>
+                                <th>Prix</th>
+                                <th>Quantité</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cart-table-body">
+                            </tbody>
+                    </table>
+                </div>
 
                 <div class="cart-summary">
                     <div class="summary-row">
