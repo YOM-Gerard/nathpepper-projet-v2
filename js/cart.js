@@ -5,6 +5,42 @@ if (typeof cart === 'undefined') {
     window.cart = cart;
 }
 
+// 🛠️ Fonction utilitaire pour afficher une notification premium à l'écran
+function showStockNotification(message, isWarning = false) {
+    // Supprime l'ancienne notification si elle existe déjà
+    const oldNotification = document.getElementById('stock-toast');
+    if (oldNotification) oldNotification.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'stock-toast';
+    toast.textContent = message;
+    
+    // Style de la notification volante
+    toast.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 20px;
+        background-color: ${isWarning ? '#c62828' : '#1a1b1c'};
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 4px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        z-index: 9999999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: opacity 0.3s ease;
+    `;
+
+    document.body.appendChild(toast);
+
+    // Disparition automatique après 3,5 secondes
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3500);
+}
+
 // 1. Fonction pour mettre à jour le petit chiffre du panier dans le header
 function updateCartCount() {
     const cartCountElement = document.getElementById('cart-count');
@@ -16,9 +52,8 @@ function updateCartCount() {
 
 // 2. La fonction qui s'enclenche quand on clique sur "Ajouter au panier"
 function addToCart(id, name, price, imageUrl) {
-    // Récupération du bouton cliqué pour vérifier sa limite data-stock passée par le PHP
     const button = document.getElementById(`btn-prod-${id}`);
-    let maxStock = 999; // Par défaut si non renseigné
+    let maxStock = 999; 
     
     if (button) {
         maxStock = parseInt(button.getAttribute('data-stock')) || 0;
@@ -31,8 +66,9 @@ function addToCart(id, name, price, imageUrl) {
         currentQuantityInCart = window.cart[existingProductIndex].quantity;
     }
 
-    // SÉCURITÉ : Si on a déjà atteint la limite du stock, on bloque l'ajout
+    // SÉCURITÉ : Limite de stock déjà atteinte
     if (currentQuantityInCart >= maxStock) {
+        showStockNotification(`Désolé, seuls ${maxStock} exemplaires sont disponibles.`, true);
         if (button) {
             button.innerText = "Rupture";
             button.disabled = true;
@@ -40,10 +76,10 @@ function addToCart(id, name, price, imageUrl) {
             button.style.setProperty('border-color', '#bbb', 'important');
             button.style.setProperty('cursor', 'not-allowed', 'important');
         }
-        return; // On stoppe la fonction
+        return; 
     }
 
-    // Procédure d'ajout standard ou incrémentation
+    // Incrémentation ou ajout du produit
     if (existingProductIndex > -1) {
         window.cart[existingProductIndex].quantity += 1;
         currentQuantityInCart = window.cart[existingProductIndex].quantity;
@@ -58,7 +94,17 @@ function addToCart(id, name, price, imageUrl) {
         currentQuantityInCart = 1;
     }
 
-    // SÉCURITÉ : Si l'ajout vient d'épuiser le dernier produit disponible, on désactive le bouton de la grille
+    // Notification utilisateur au moment de l'ajout
+    const stockRestant = maxStock - currentQuantityInCart;
+    if (stockRestant === 0) {
+        showStockNotification(`✨ Vous avez ajouté le dernier exemplaire de "${name}" !`);
+    } else if (stockRestant <= 2) {
+        showStockNotification(`🔥 Plus que ${stockRestant} articles disponibles pour ce poivre !`);
+    } else {
+        showStockNotification(`✓ "${name}" a bien été ajouté au panier.`);
+    }
+
+    // Verrouillage immédiat du bouton de la grille si le stock est épuisé
     if (currentQuantityInCart >= maxStock && button) {
         button.innerText = "Rupture";
         button.disabled = true;
@@ -90,51 +136,3 @@ function renderCartItems() {
     }
     
     let htmlContent = '';
-    let grandTotal = 0;
-    
-    window.cart.forEach((item, index) => {
-        const itemTotal = item.price * item.quantity;
-        grandTotal += itemTotal;
-        
-        // On récupère le bouton d'origine sur la page pour connaître la limite de stock de cet item
-        const originalButton = document.getElementById(`btn-prod-${item.id}`);
-        let maxStock = 999;
-        if (originalButton) {
-            maxStock = parseInt(originalButton.getAttribute('data-stock')) || 0;
-        }
-
-        // SÉCURITÉ MODAL : Si la quantité dans le panier est supérieure ou égale au stock, on désactive ou masque le bouton "+"
-        const isPlusDisabled = item.quantity >= maxStock ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : '';
-        
-        htmlContent += `
-            <div class="cart-item-row" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #eee;">
-                <div class="cart-item-info" style="display: flex; align-items: center; gap: 15px;">
-                    <img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                    <div>
-                        <h4 style="margin: 0; font-family: 'Playfair Display', serif;">${item.name}</h4>
-                        <span style="color: #666; font-size: 0.9rem;">${item.price.toFixed(2).replace('.', ',')} € / unité</span>
-                    </div>
-                </div>
-                
-                <div class="cart-item-actions" style="display: flex; align-items: center; gap: 15px;">
-                    <div class="qty-controls" style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; background: #fff;">
-                        <button onclick="changeQuantityMinus(${index})" style="background: none; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem;">-</button>
-                        <span style="padding: 0 5px; font-weight: 500; min-width: 20px; text-align: center;">${item.quantity}</span>
-                        <button onclick="changeQuantityPlus(${index})" ${isPlusDisabled} style="background: none; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem;">+</button>
-                    </div>
-                    
-                    <span class="item-total-price" style="font-weight: 600; min-width: 70px; text-align: right;">${itemTotal.toFixed(2).replace('.', ',')} €</span>
-                    
-                    <button onclick="removeProductFromCart(${index})" style="background: none; border: none; color: #cc0000; cursor: pointer; font-size: 1.2rem; padding: 0 5px;" title="Supprimer l'article">🗑️</button>
-                </div>
-            </div>
-        `;
-    });
-    
-    cartItemsContainer.innerHTML = htmlContent;
-    if (cartTotalElement) {
-        cartTotalElement.textContent = grandTotal.toFixed(2).replace('.', ',') + ' €';
-    }
-}
-
-// 4.
