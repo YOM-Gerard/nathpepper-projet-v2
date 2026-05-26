@@ -61,11 +61,34 @@ if (isset($_SESSION['user_id'])) {
                     <input type="password" id="password" name="password" required placeholder="••••••••">
                 </div>
                 <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Se connecter</button>
+                
+                <div style="margin-top: 1.5rem; text-align: center; font-family: 'Inter', sans-serif; font-size: 0.9rem;">
+                    <span style="color: #666;">Vous n'avez pas de compte ? </span>
+                    <a href="#" id="open-register-trigger" style="color: #1a1b1c; font-weight: 600; text-decoration: underline; transition: color 0.2s;">
+                        Créez un compte ici
+                    </a>
+                </div>
             </form>
         </section>
     </main>
 
     <?php require_once 'includes/footer.php'; ?>
 
-</body>
-</html>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var registerTrigger = document.getElementById('open-register-trigger');
+        var accountModal = document.getElementById('account-modal');
+        
+        if (registerTrigger && accountModal) {
+            registerTrigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 1. On affiche la modale globale de compte
+                accountModal.style.display = 'block';
+                
+                // 2. On force l'affichage du formulaire d'inscription et on cache la connexion
+                var registerForm = document.getElementById('register-form');
+                var loginForm = document.getElementById('login-form');
+                
+                if (registerForm) registerForm.classList.add('active');
+                if (loginForm) loginForm.classList.remove
