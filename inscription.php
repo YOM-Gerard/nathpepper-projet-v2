@@ -1,6 +1,8 @@
 <?php
 session_start();
-require_once 'includes/db.php'; // Charge ton instance de connexion $pdo
+require_once 'includes/db.php'; // Charge l'instance PDO ($pdo)
+
+header('Content-Type: application/json');
 
 // Réception des données du formulaire HTML classique ($_POST)
 $firstname = trim($_POST['firstname'] ?? '');
@@ -10,56 +12,58 @@ $phone     = trim($_POST['phone'] ?? '');
 $address   = trim($_POST['address'] ?? '');
 $password  = $_POST['password'] ?? '';
 
-// Contrôle de sécurité sur les données reçues
+// Vérification de la présence de toutes les informations de livraison (CORRIGÉ !)
 if (empty($firstname) || empty($lastname) || empty($email) || empty($phone) || empty($address) || empty($password)) {
-    $_SESSION['error_login'] = 'Veuillez remplir l\'intégralité des champs de livraison obligatoires.';
+    $_SESSION['error_login'] = 'Veuillez renseigner tous les champs obligatoires pour configurer votre compte de livraison.';
     header('Location: connexion.php');
     exit();
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $_SESSION['error_login'] = "Le format de votre adresse email est invalide.";
+    $_SESSION['error_login'] = "L'adresse email saisie possède un format invalide.";
     header('Location: connexion.php');
     exit();
 }
 
 try {
-    // 1. On s'assure que l'adresse email n'existe pas déjà
+    // 1. On contrôle que l'adresse email n'existe pas déjà
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
     $stmt->execute(['email' => $email]);
     if ($stmt->fetch()) {
-        $_SESSION['error_login'] = 'Cette adresse email est déjà rattachée à un compte.';
+        $_SESSION['error_login'] = 'Cette adresse email est déjà associée à un compte Nathpepper.';
         header('Location: connexion.php');
         exit();
     }
 
-    // 2. Cryptage sécurisé du mot de passe
+    // 2. Cryptage de sécurité du mot de passe
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-    // 3. Concaténation de l'identité et des coordonnées pour la colonne globale 'name'
-    $fullProfileName = $firstname . ' ' . $lastname . ' (Tél: ' . $phone . ' - Exp: ' . $address . ')';
+    // 3. Reconstitution du Nom Complet pour la colonne 'name'
+    $fullName = $firstname . ' ' . $lastname;
 
-    // 4. Insertion dans ta table d'utilisateurs
-    $stmtInsert = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
+    // 4. Écriture ordonnée dans la base de données (Chaque donnée dans sa colonne !)
+    $stmtInsert = $pdo->prepare("INSERT INTO users (name, email, password, phone, address) VALUES (:name, :email, :password, :phone, :address)");
     $stmtInsert->execute([
-        'name'     => $fullProfileName,
+        'name'     => $fullName,
         'email'    => $email,
-        'password' => $hashedPassword
+        'password' => $hashedPassword,
+        'phone'    => $phone,
+        'address'  => $address
     ]);
 
-    // 5. Initialisation des variables de session
+    // 5. Enregistrement de la session utilisateur
     $_SESSION['user_id'] = $pdo->lastInsertId();
-    $_SESSION['user_name'] = $firstname;
+    $_SESSION['user_name'] = $firstname; // Stocke le prénom pour saluer l'utilisateur dans le header
     
-    // Ton message de succès en vert !
-    $_SESSION['success_register'] = "✨ Félicitations " . htmlspecialchars($firstname) . ", vous êtes bien inscrit ! Votre compte de livraison premium a été configuré avec succès.";
+    // Le message de confirmation personnalisé avec le prénom
+    $_SESSION['success_register'] = "✨ Félicitations " . htmlspecialchars($firstname) . ", vous êtes bien inscrit ! Votre compte de livraison a été configuré avec succès.";
 
-    // Redirection immédiate vers ton catalogue de poivres !
+    // Redirection directe vers la boutique
     header('Location: produits.php');
     exit();
 
 } catch (Exception $e) {
-    $_SESSION['error_login'] = 'Erreur technique base de données : ' . $e->getMessage();
+    $_SESSION['error_login'] = 'Erreur lors de la création de votre profil en base de données : ' . $e->getMessage();
     header('Location: connexion.php');
     exit();
 }
