@@ -40,7 +40,7 @@ if (isset($_SESSION['user_id'])) {
 
         <section class="contact-section" style="max-width: 500px; margin: 0 auto;">
             <h2 class="section-title">Connexion</h2>
-            <p class="section-subtitle">Accédez à votre espace pour suivre vos commandes de poivres d'exception.</p>
+            <p class="section-subtitle">Accédez à votre space pour suivre vos commandes de poivres d'exception.</p>
 
             <?php if (isset($_SESSION['error_login'])): ?>
                 <div class="alert-error">
@@ -74,6 +74,37 @@ if (isset($_SESSION['user_id'])) {
 
     <?php require_once 'includes/footer.php'; ?>
 
+    <div id="account-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('account-modal').style.display='none'">&times;</span>
+            <div class="modal-header">
+                <h2>Mon Compte</h2>
+            </div>
+            <div class="account-tabs">
+                <button class="tab-btn" data-tab="login" onclick="window.location.href='connexion.php'">Connexion</button>
+                <button class="tab-btn active" data-tab="register">Inscription</button>
+            </div>
+            
+            <div id="register-form" class="tab-content active" style="display: block;">
+                <form action="inscription.php" method="POST" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label for="register-name">Nom</label>
+                        <input type="text" id="register-name" name="name" required placeholder="Ex: Jean Dupont">
+                    </div>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" name="email" required placeholder="votre.email@exemple.com">
+                    </div>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label for="register-password">Mot de passe</label>
+                        <input type="password" id="register-password" name="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1.5rem;">S'inscrire</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         var registerTrigger = document.getElementById('open-register-trigger');
@@ -82,13 +113,12 @@ if (isset($_SESSION['user_id'])) {
         if (registerTrigger && accountModal) {
             registerTrigger.addEventListener('click', function(e) {
                 e.preventDefault();
-                
-                // 1. On affiche la modale globale de compte
+                // Ouvre directement la vue inscription intégrée
                 accountModal.style.display = 'block';
-                
-                // 2. On force l'affichage du formulaire d'inscription et on cache la connexion
-                var registerForm = document.getElementById('register-form');
-                var loginForm = document.getElementById('login-form');
-                
-                if (registerForm) registerForm.classList.add('active');
-                if (loginForm) loginForm.classList.remove
+            });
+        }
+    });
+    </script>
+
+</body>
+</html>
