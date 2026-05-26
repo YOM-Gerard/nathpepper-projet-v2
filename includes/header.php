@@ -16,7 +16,11 @@ if (session_status() === PHP_SESSION_NONE) {
             <li><a href="contact.php" class="nav-link">Contact</a></li>
             
             <?php if (isset($_SESSION['user_id'])): ?>
-                <li><span class="nav-link user-profile-name" style="cursor: default; font-weight: 500; letter-spacing: 1px;">Compte : <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Client', ENT_QUOTES, 'UTF-8'); ?></span></li>
+                <li>
+                    <a href="mon-compte.php" class="nav-link user-profile-name" style="font-weight: 500; letter-spacing: 1px;">
+                        Compte : <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Client', ENT_QUOTES, 'UTF-8'); ?>
+                    </a>
+                </li>
                 <li><a href="mes-commandes.php" class="nav-link">Mes Commandes</a></li>
                 <li><a href="deconnexion.php" class="nav-link" style="color: #c62828 !important; font-weight: 500;">Déconnexion</a></li>
             <?php else: ?>
@@ -61,7 +65,7 @@ if (session_status() === PHP_SESSION_NONE) {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* 2. Rideau Mobile Compacté (Ajusté pour que TOUT tienne à l'écran) */
+    /* 2. Rideau Mobile Compacté */
     .nav-menu {
         display: flex !important; 
         flex-direction: column !important;
@@ -79,7 +83,7 @@ if (session_status() === PHP_SESSION_NONE) {
         
         margin: 0 !important;
         padding: 1.5rem !important;
-        gap: 15px !important; /* Espacement réduit entre les blocs de liens */
+        gap: 15px !important;
         
         opacity: 0 !important;
         visibility: hidden !important;
@@ -101,20 +105,20 @@ if (session_status() === PHP_SESSION_NONE) {
         list-style: none !important;
     }
 
-    /* 3. Typographie Affinée (Moins grosse, plus équilibrée) */
+    /* 3. Typographie Affinée */
     .nav-menu li a, .nav-menu li span {
         display: inline-block !important;
         font-family: 'Playfair Display', serif !important;
-        font-size: 1.35rem !important; /* Taille descendue de 1.8rem à 1.35rem */
+        font-size: 1.35rem !important;
         font-weight: 400 !important;
         color: #1a1b1c !important;
         text-decoration: none !important;
-        padding: 5px 0 !important; /* Moins de padding pour gagner de la hauteur */
+        padding: 5px 0 !important;
         letter-spacing: 0.5px;
     }
 
-    /* Style spécifique pour la ligne "Compte : Gilbert" */
-    .nav-menu li span.user-profile-name {
+    /* Style spécifique pour la ligne "Compte : Prénom" */
+    .nav-menu li a.user-profile-name {
         font-size: 1.1rem !important;
         color: #757575 !important;
         border-top: 1px solid #eeeeee;
