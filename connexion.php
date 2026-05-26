@@ -164,8 +164,19 @@ if (isset($_SESSION['user_id'])) {
                         </div>
 
                         <div class="custom-form-group">
-                            <label for="ins-address">Adresse complète de livraison</label>
-                            <textarea id="ins-address" name="address" required placeholder="Numéro, rue, code postal, ville..." rows="3"></textarea>
+                            <label for="ins-address">Adresse (Rue et Numéro)</label>
+                            <textarea id="ins-address" name="address" required placeholder="Ex: 15 Rue de la Paix, Bâtiment B" rows="2"></textarea>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
+                            <div class="custom-form-group">
+                                <label for="ins-zipcode">Code Postal</label>
+                                <input type="text" id="ins-zipcode" name="zipcode" required placeholder="75002">
+                            </div>
+                            <div class="custom-form-group">
+                                <label for="ins-city">Ville</label>
+                                <input type="text" id="ins-city" name="city" required placeholder="Paris">
+                            </div>
                         </div>
 
                         <div class="custom-form-group">

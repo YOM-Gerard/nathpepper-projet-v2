@@ -1,67 +1,71 @@
 <?php
 session_start();
-require_once 'includes/db.php'; // Charge ton instance PDO ($pdo)
+require_once 'includes/db.php'; // Charge l'instance PDO ($pdo)
 
-// Réception des données du formulaire HTML classique ($_POST)
+// Réception de l'intégralité des variables de livraison natives du formulaire
 $firstname = trim($_POST['firstname'] ?? '');
 $lastname  = trim($_POST['lastname'] ?? '');
 $email     = trim($_POST['email'] ?? '');
 $phone     = trim($_POST['phone'] ?? '');
 $address   = trim($_POST['address'] ?? '');
+$zipcode   = trim($_POST['zipcode'] ?? '');
+$city      = trim($_POST['city'] ?? '');
 $password  = $_POST['password'] ?? '';
 
-// Vérification de la présence de toutes les informations de livraison
-if (empty($firstname) || empty($lastname) || empty($email) || empty($phone) || empty($address) || empty($password)) {
-    $_SESSION['error_login'] = 'Veuillez renseigner tous les champs obligatoires pour configurer votre compte de livraison.';
+// Vérification globale de la complétude du dossier de livraison
+if (empty($firstname) || empty($lastname) || empty($email) || empty($phone) || empty($address) || empty($zipcode) || empty($city) || empty($password)) {
+    $_SESSION['error_login'] = 'Veuillez remplir toutes les cases (Prénom, Nom, Email, Téléphone, Adresse, Code Postal et Ville).';
     header('Location: connexion.php');
     exit();
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $_SESSION['error_login'] = "L'adresse email saisie possède un format invalide.";
+    $_SESSION['error_login'] = "Le format de votre adresse email est invalide.";
     header('Location: connexion.php');
     exit();
 }
 
 try {
-    // 1. On contrôle que l'adresse email n'existe pas déjà
+    // 1. Contrôle anti-doublon d'email
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
     $stmt->execute(['email' => $email]);
     if ($stmt->fetch()) {
-        $_SESSION['error_login'] = 'Cette adresse email est déjà associée à un compte Nathpepper.';
+        $_SESSION['error_login'] = 'Cette adresse email est déjà utilisée par un autre compte.';
         header('Location: connexion.php');
         exit();
     }
 
-    // 2. Cryptage de sécurité du mot de passe
+    // 2. Hachage du mot de passe
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-    // 3. Reconstitution du Nom Complet pour la colonne 'name'
+    // 3. Fusion des chaînes pour l'identité
     $fullName = $firstname . ' ' . $lastname;
 
-    // 4. Écriture ordonnée dans la base de données (Chaque donnée va dans SA colonne)
-    $stmtInsert = $pdo->prepare("INSERT INTO users (name, email, password, phone, address) VALUES (:name, :email, :password, :phone, :address)");
+    // 4. Écriture structurée en Base de Données (Une case propre pour chaque info)
+    $stmtInsert = $pdo->prepare("INSERT INTO users (name, email, password, phone, address, zipcode, city) VALUES (:name, :email, :password, :phone, :address, :zipcode, :city)");
     $stmtInsert->execute([
         'name'     => $fullName,
         'email'    => $email,
         'password' => $hashedPassword,
         'phone'    => $phone,
-        'address'  => $address
+        'address'  => $address,
+        'zipcode'  => $zipcode,
+        'city'     => $city
     ]);
 
-    // 5. Enregistrement de la session utilisateur
+    // 5. Ouverture de la session d'achat
     $_SESSION['user_id'] = $pdo->lastInsertId();
-    $_SESSION['user_name'] = $firstname; // Stocke le prénom pour le header
+    $_SESSION['user_name'] = $firstname;
     
-    // Le fameux message de confirmation vert personnalisé avec le prénom !
-    $_SESSION['success_register'] = "✨ Félicitations " . htmlspecialchars($firstname) . ", vous êtes bien inscrit ! Votre compte de livraison a été configuré avec succès.";
+    // Message vert de confirmation
+    $_SESSION['success_register'] = "✨ Félicitations " . htmlspecialchars($firstname) . ", votre compte de livraison a été créé avec succès !";
 
-    // Redirection directe vers la boutique
+    // Redirection directe vers ton catalogue
     header('Location: produits.php');
     exit();
 
 } catch (Exception $e) {
-    $_SESSION['error_login'] = 'Erreur lors de la création de votre profil en base de données : ' . $e->getMessage();
+    $_SESSION['error_login'] = 'Erreur technique lors de l\'enregistrement : ' . $e->getMessage();
     header('Location: connexion.php');
     exit();
 }
