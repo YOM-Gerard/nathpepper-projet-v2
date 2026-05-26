@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once 'includes/db.php';
 ?>
 <!DOCTYPE html>
@@ -33,7 +35,7 @@ require_once 'includes/db.php';
         .form-control { width: 100%; padding: 12px; background: #fbf9f6; border: 1px solid #eae5dc; border-radius: 2px; color: #1a1b1c; font-family: inherit; font-size: 0.95rem; box-sizing: border-box; }
         .form-control:focus { border-color: #1a1b1c; outline: none; }
         
-        /* ─── SARTORIAL REDESIGN DU BOUTON D'ENVOI ─── */
+        /* ─── STYLE DU BOUTON REVISITÉ ET SÉCURISÉ ─── */
         .btn-gold { 
             background-color: #1a1b1c !important; /* Même couleur noire mate que ton footer */
             color: #ffffff !important; 
@@ -41,27 +43,25 @@ require_once 'includes/db.php';
             width: 100%; 
             padding: 14px; 
             
-            /* Bords plus arrondis et accueillants */
+            /* Bords plus arrondis */
             border-radius: 6px !important; 
             
-            /* Police Haute Gastronomie / Édition */
+            /* Police Haute Gastronomie */
             font-family: 'Playfair Display', serif !important; 
             font-size: 1.05rem !important; 
-            font-weight: 500 !important; /* Lettrage plus fin et sophistiqué */
-            text-transform: none !important; /* On retire les majuscules massives */
+            font-weight: 500 !important; 
+            text-transform: none !important; 
             letter-spacing: 0.5px !important;
             
             cursor: pointer; 
             transition: all 0.2s ease-in-out !important; 
         }
         
-        /* Légère réaction au survol */
         .btn-gold:hover { 
             background-color: #333333 !important; 
             border-color: #333333 !important; 
         }
         
-        /* Action tactile mobile */
         .btn-gold:active { 
             background-color: #fbf9f6 !important; 
             color: #1a1b1c !important; 
@@ -71,4 +71,64 @@ require_once 'includes/db.php';
         .header {
             background-color: #ffffff !important;
             border-bottom: 1px solid #eae5dc !important;
-            box-shadow: 0
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02) !important;
+        }
+
+        /* Ajustements d'aération sur smartphone */
+        @media (max-width: 768px) { 
+            .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; padding: 2rem 1.5rem; } 
+            .contact-title { font-size: 2.1rem; }
+            .contact-form { padding: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <?php require_once 'includes/header.php'; ?>
+
+    <main class="container">
+        <div style="height: 120px; width: 100%;"></div>
+
+        <div class="contact-grid">
+            <div>
+                <h1 class="contact-title">Entrer en Relation</h1>
+                <p style="color: #444444; line-height: 1.7; margin-bottom: 3rem; font-weight: 300;">Vous êtes un chef cuisinier, un amateur exigeant ou vous avez simplement une question sur l'une de nos variétés ? Notre service conciergerie est à votre entière disposition.</p>
+                
+                <div class="info-block">
+                    <h4>Le Comptoir Parisien</h4>
+                    <p style="font-weight: 300;">12 rue des Poivres Rares<br>75001 Paris, France</p>
+                </div>
+
+                <div class="info-block">
+                    <h4>Correspondance</h4>
+                    <p style="font-weight: 300;">Mails : contact@nathpepper.com<br>Téléphone : +33 (0)1 42 60 00 00</p>
+                </div>
+            </div>
+
+            <div>
+                <form class="contact-form" action="#" method="POST" onsubmit="alert('Message simulé avec succès !'); return false;">
+                    <div class="form-group">
+                        <label for="name">Nom Complet</label>
+                        <input type="text" id="name" class="form-control" placeholder="Gilbert Grandcru" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Adresse E-mail</label>
+                        <input type="email" id="email" class="form-control" placeholder="gilbert@mail.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Votre Message</label>
+                        <textarea id="message" class="form-control" rows="5" placeholder="Décrivez votre projet gastronomique ou votre question..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-gold">Envoyer le message</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <?php require_once 'includes/footer.php'; ?>
+
+</body>
+</html>
