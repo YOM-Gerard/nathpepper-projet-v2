@@ -32,7 +32,7 @@ if (isset($_GET['delete'])) {
 
 // 3. RÉCUPÉRATION DE TOUS LES PRODUITS (READ) WITH STOCK FIELD
 try {
-    // La requête SQL récupère bien toutes les colonnes (*) donc la colonne stock est incluse
+    // La requête SQL récupère bien toutes les colonnes (*) donc la colonne stock et poids sont incluses
     $stmt = $pdo->query("SELECT * FROM products ORDER BY id DESC");
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
@@ -96,14 +96,14 @@ try {
                         <th>Visuel</th>
                         <th>Nom du produit</th>
                         <th>Prix</th>
-                        <th>Stock disponible</th>
+                        <th>Grammage</th> <th>Stock disponible</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($products)): ?>
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 30px; color: #888;">Aucun produit dans la base de données.</td>
+                            <td colspan="6" style="text-align: center; padding: 30px; color: #888;">Aucun produit dans la base de données.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($products as $prod): ?>
@@ -118,6 +118,12 @@ try {
                                     <strong><?php echo htmlspecialchars($prod['name'] ?? $prod['nom']); ?></strong>
                                 </td>
                                 <td><strong><?php echo number_format($prod['price'] ?? $prod['prix'], 2, ',', ' '); ?> €</strong></td>
+                                
+                                <td>
+                                    <span style="font-weight: 500; color: #555;">
+                                        <?php echo !empty($prod['poids']) ? (int)$prod['poids'] : 30; ?>g
+                                    </span>
+                                </td>
                                 
                                 <td>
                                     <?php 
