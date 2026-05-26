@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'includes/db.php';
+require_once 'includes/db.php'; // Connexion $pdo
 
 // Sécurité Admin
 if (!isset($_SESSION['user_id'])) { header('Location: connexion.php'); exit(); }
@@ -10,7 +10,7 @@ $user = $stmtCheck->fetch(PDO::FETCH_ASSOC);
 if (!$user || $user['is_admin'] != 1) { header('Location: index.php'); exit(); }
 
 $is_edit = false;
-$product = ['id' => '', 'name' => '', 'price' => '', 'image' => ''];
+$product = ['id' => '', 'name' => '', 'price' => '', 'poids' => 30, 'image_url' => ''];
 
 // Mode Modification : On charge les données existantes du poivre
 if (isset($_GET['id'])) {
@@ -20,12 +20,12 @@ if (isset($_GET['id'])) {
     $stmt->execute(['id' => $id]);
     $res = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($res) {
-        // CORRECTION : Utilisation de 'image_url' pour s'aligner sur la BDD
         $product = [
             'id' => $res['id'],
             'name' => $res['name'] ?? '',
             'price' => $res['price'] ?? '',
-            'image' => $res['image_url'] ?? ''
+            'poids' => $res['poids'] ?? 30,
+            'image_url' => $res['image_url'] ?? '' // Clé harmonisée
         ];
     }
 }
@@ -34,7 +34,10 @@ if (isset($_GET['id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
     $price = floatval($_POST['price']);
-    $image_path = $_POST['current_image'] ?? 'public/images/default-pepper.jpg';
+    $poids = intval($_POST['poids']);
+    
+    // Récupération de l'ancienne image si aucun nouveau chemin n'est fourni
+    $image_path = !empty($_POST['current_image']) ? trim($_POST['current_image']) : 'public/images/default-pepper.jpg';
 
     if (!empty($_POST['image_url'])) {
         $image_path = trim($_POST['image_url']);
@@ -42,15 +45,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         if ($is_edit) {
-            // Mode UPDATE : Modification de la colonne 'image' en 'image_url'
-            $sql = "UPDATE products SET name = :name, price = :price, image_url = :image WHERE id = :id";
+            $sql = "UPDATE products SET name = :name, price = :price, poids = :poids, image_url = :image WHERE id = :id";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute(['name' => $name, 'price' => $price, 'image' => $image_path, 'id' => $product['id']]);
+            $stmt->execute([
+                'name' => $name, 
+                'price' => $price, 
+                'poids' => $poids, 
+                'image' => $image_path, 
+                'id' => $product['id']
+            ]);
         } else {
-            // Mode CREATE : Modification de la colonne 'image' en 'image_url'
-            $sql = "INSERT INTO products (name, price, image_url) VALUES (:name, :price, :image)";
+            $sql = "INSERT INTO products (name, price, poids, image_url) VALUES (:name, :price, :poids, :image)";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute(['name' => $name, 'price' => $price, 'image' => $image_path]);
+            $stmt->execute([
+                'name' => $name, 
+                'price' => $price, 
+                'poids' => $poids, 
+                'image' => $image_path
+            ]);
         }
         header('Location: admin-produits.php');
         exit();
@@ -95,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
 
                 <form action="" method="POST" class="contact-form">
-                    <input type="hidden" name="current_image" value="<?php echo htmlspecialchars($product['image']); ?>">
+                    <input type="hidden" name="current_image" value="<?php echo htmlspecialchars($product['image_url']); ?>">
 
                     <div class="form-group">
                         <label for="name">Nom du Poivre</label>
@@ -108,8 +120,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <div class="form-group" style="margin-top: 1rem;">
+                        <label for="poids">Poids / Grammage (en g)</label>
+                        <input type="number" id="poids" name="poids" min="1" required value="<?php echo htmlspecialchars($product['poids']); ?>" placeholder="Ex: 30">
+                    </div>
+
+                    <div class="form-group" style="margin-top: 1rem;">
                         <label for="image_url">Chemin de l'image</label>
-                        <input type="text" id="image_url" name="image_url" value="<?php echo htmlspecialchars($product['image']); ?>" placeholder="Ex: public/images/poivre-vert.jpg">
+                        <input type="text" id="image_url" name="image_url" value="<?php echo htmlspecialchars($product['image_url']); ?>" placeholder="Ex: public/images/poivre-vert.jpg">
                     </div>
 
                     <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1.5rem;">
