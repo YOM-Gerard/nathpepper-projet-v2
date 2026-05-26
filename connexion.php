@@ -12,12 +12,30 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nathpepper - Connexion</title>
+    <title>Nathpepper - Espace Client</title>
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
     <link rel="stylesheet" href="styles/responsive.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
+        .auth-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        @media (min-width: 768px) {
+            .auth-grid {
+                grid-template-columns: 1fr 1fr;
+                align-items: start;
+            }
+            .auth-divider {
+                border-left: 1px solid #e8e2d5;
+                padding-left: 3rem;
+            }
+        }
         .alert-error {
             background-color: #ffebee;
             color: #c62828;
@@ -40,6 +58,27 @@ if (isset($_SESSION['user_id'])) {
             text-align: center;
             border: 1px solid #a5d6a7;
         }
+        .custom-form-group {
+            margin-bottom: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .custom-form-group label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1a1b1c;
+        }
+        .custom-form-group input, .custom-form-group textarea {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #1a1b1c;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            background: #fff;
+        }
     </style>
 </head>
 <body>
@@ -49,10 +88,7 @@ if (isset($_SESSION['user_id'])) {
     <main class="container">
         <div style="height: 140px; width: 100%;"></div>
 
-        <section class="contact-section" style="max-width: 500px; margin: 0 auto;">
-            <h2 class="section-title">Connexion</h2>
-            <p class="section-subtitle">Accédez à votre espace pour suivre vos commandes de poivres d'exception.</p>
-
+        <div style="max-width: 900px; margin: 0 auto; padding: 0 1rem;">
             <?php if (isset($_SESSION['error_login'])): ?>
                 <div class="alert-error">
                     <?php 
@@ -70,143 +106,73 @@ if (isset($_SESSION['user_id'])) {
                     ?>
                 </div>
             <?php endif; ?>
+        </div>
 
-            <form action="traitement-connexion.php" method="POST" class="contact-form">
-                <div class="form-group">
-                    <label for="email">Adresse Email</label>
-                    <input type="email" id="email" name="email" required placeholder="votre.email@exemple.com">
-                </div>
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
-                    <input type="password" id="password" name="password" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Se connecter</button>
-                
-                <div style="margin-top: 1.5rem; text-align: center; font-family: 'Inter', sans-serif; font-size: 0.9rem;">
-                    <span style="color: #666;">Vous n'avez pas de compte ? </span>
-                    <a href="#" id="open-register-trigger" style="color: #1a1b1c; font-weight: 600; text-decoration: underline; transition: color 0.2s;">
-                        Créez un compte ici
-                    </a>
-                </div>
-            </form>
-        </section>
+        <div class="auth-grid">
+            
+            <section class="contact-section" style="margin: 0; max-width: 100%;">
+                <h2 class="section-title" style="text-align: left; font-size: 2rem;">Connexion</h2>
+                <p class="section-subtitle" style="text-align: left; margin-bottom: 2rem;">Accédez à votre espace pour suivre vos commandes.</p>
+
+                <form action="traitement-connexion.php" method="POST" class="contact-form">
+                    <div class="form-group">
+                        <label for="email">Adresse Email</label>
+                        <input type="email" id="email" name="email" required placeholder="votre.email@exemple.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" name="password" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Se connecter</button>
+                </form>
+            </section>
+
+            <section class="contact-section auth-divider" style="margin: 0; max-width: 100%;">
+                <h2 class="section-title" style="text-align: left; font-size: 2rem;">Inscription</h2>
+                <p class="section-subtitle" style="text-align: left; margin-bottom: 2rem;">Créez votre compte de livraison pour commander vos poivres d'exception.</p>
+
+                <form action="inscription.php" method="POST" class="contact-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="custom-form-group">
+                            <label for="ins-firstname">Prénom</label>
+                            <input type="text" id="ins-firstname" name="firstname" required placeholder="Jean">
+                        </div>
+                        <div class="custom-form-group">
+                            <label for="ins-lastname">Nom</label>
+                            <input type="text" id="ins-lastname" name="lastname" required placeholder="Dupont">
+                        </div>
+                    </div>
+                    
+                    <div class="custom-form-group">
+                        <label for="ins-email">Adresse Email</label>
+                        <input type="email" id="ins-email" name="email" required placeholder="jean.dupont@exemple.com">
+                    </div>
+
+                    <div class="custom-form-group">
+                        <label for="ins-phone">Numéro de téléphone</label>
+                        <input type="tel" id="ins-phone" name="phone" required placeholder="06 12 34 56 78">
+                    </div>
+
+                    <div class="custom-form-group">
+                        <label for="ins-address">Adresse complète de livraison</label>
+                        <textarea id="ins-address" name="address" required placeholder="Numéro, rue, code postal, ville, bâtiment..." rows="3"></textarea>
+                    </div>
+
+                    <div class="custom-form-group">
+                        <label for="ins-password">Mot de passe</label>
+                        <input type="password" id="ins-password" name="password" required placeholder="••••••••">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">Créer mon compte</button>
+                </form>
+            </section>
+
+        </div>
     </main>
 
+    <div style="height: 60px; width: 100%;"></div>
+
     <?php require_once 'includes/footer.php'; ?>
-
-    <div id="account-modal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 500px; border-radius: 8px;">
-            <span class="close" onclick="document.getElementById('account-modal').style.display='none'">&times;</span>
-            <div class="modal-header">
-                <h2>Mon Compte</h2>
-            </div>
-            <div class="account-tabs">
-                <button class="tab-btn" onclick="window.location.href='connexion.php'">Connexion</button>
-                <button class="tab-btn active">Inscription</button>
-            </div>
-            
-            <div id="secure-register-block" style="max-height: 60vh; overflow-y: auto; padding-right: 5px; margin-top: 15px;">
-                <div id="modal-error-box" class="alert-error" style="display: none;"></div>
-                
-                <form id="nathpepper-independent-form" onsubmit="return false;">
-                    <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                        <div class="form-group" style="flex: 1;">
-                            <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Prénom</label>
-                            <input type="text" id="secure-firstname" required placeholder="Jean" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Nom</label>
-                            <input type="text" id="secure-lastname" required placeholder="Dupont" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Adresse Email</label>
-                        <input type="email" id="secure-email" required placeholder="jean.dupont@exemple.com" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                    </div>
-
-                    <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Numéro de téléphone</label>
-                        <input type="tel" id="secure-phone" required placeholder="06 12 34 56 78" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                    </div>
-
-                    <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Adresse complète de livraison</label>
-                        <textarea id="secure-address" required placeholder="Numéro, rue, code postal, ville..." rows="3" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; resize: vertical;"></textarea>
-                    </div>
-
-                    <div class="form-group" style="margin-bottom: 15px;">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Mot de passe</label>
-                        <input type="password" id="secure-password" required placeholder="••••••••" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-                    </div>
-                    
-                    <button type="button" id="secure-submit-btn" class="btn-primary" style="width: 100%; padding: 12px; font-weight: 600;">S'inscrire</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var trigger = document.getElementById('open-register-trigger');
-        var modal = document.getElementById('account-modal');
-        var submitBtn = document.getElementById('secure-submit-btn');
-        var errorBox = document.getElementById('modal-error-box');
-
-        if (trigger && modal) {
-            trigger.addEventListener('click', function(e) {
-                e.preventDefault();
-                modal.style.display = 'block';
-            });
-        }
-
-        if (submitBtn) {
-            submitBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                errorBox.style.display = 'none';
-
-                var payload = {
-                    firstname: document.getElementById('secure-firstname').value.trim(),
-                    lastname: document.getElementById('secure-lastname').value.trim(),
-                    email: document.getElementById('secure-email').value.trim(),
-                    phone: document.getElementById('secure-phone').value.trim(),
-                    address: document.getElementById('secure-address').value.trim(),
-                    password: document.getElementById('secure-password').value
-                };
-
-                // Vérification basique côté client avant envoi
-                if (!payload.firstname || !payload.lastname || !payload.email || !payload.phone || !payload.address || !payload.password) {
-                    errorBox.textContent = "Veuillez remplir tous les champs.";
-                    errorBox.style.display = 'block';
-                    return;
-                }
-
-                // Envoi Fetch natif corrigé
-                fetch('inscription.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                })
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    if (data.success) {
-                        // Succès -> Redirection vers la boutique
-                        window.location.href = 'produits.php';
-                    } else {
-                        errorBox.textContent = data.message;
-                        errorBox.style.display = 'block';
-                    }
-                })
-                .catch(function(err) {
-                    errorBox.textContent = "Erreur réseau lors de l'inscription.";
-                    errorBox.style.display = 'block';
-                });
-            });
-        }
-    });
-    </script>
 
 </body>
 </html>
