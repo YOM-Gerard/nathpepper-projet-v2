@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'includes/db.php';
+require_once 'includes/db.php'; // Charge ton instance $pdo
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
     $userId = $_SESSION['user_id'];
@@ -16,12 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
     }
 
     try {
-        // 🛠️ CORRECTION : Utilisation exacte de 'total_amount' comme vu sur ta structure de base de données
-        $stmt = $pdo->prepare("INSERT INTO orders (user_id, total_amount, delivery_phone, delivery_address, delivery_zipcode, delivery_city) VALUES (:user_id, :total, :phone, :address, :zipcode, :city)");
+        // Insertion propre avec les colonnes que l'on vient de greffer à ta table orders
+        $stmt = $pdo->prepare("INSERT INTO orders (user_id, total_amount, delivery_phone, delivery_address, delivery_zipcode, delivery_city, status) VALUES (:user_id, :total, :phone, :address, :zipcode, :city, 'En préparation')");
         
         $stmt->execute([
             'user_id' => $userId,
-            'total'   => $totalPrice, // Le montant récupéré du formulaire
+            'total'   => $totalPrice,
             'phone'   => $phone,
             'address' => $address,
             'zipcode' => $zipcode,
