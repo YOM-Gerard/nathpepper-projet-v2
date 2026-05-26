@@ -40,7 +40,7 @@ if (isset($_SESSION['user_id'])) {
 
         <section class="contact-section" style="max-width: 500px; margin: 0 auto;">
             <h2 class="section-title">Connexion</h2>
-            <p class="section-subtitle">Accédez à votre space pour suivre vos commandes de poivres d'exception.</p>
+            <p class="section-subtitle">Accédez à votre espace pour suivre vos commandes de poivres d'exception.</p>
 
             <?php if (isset($_SESSION['error_login'])): ?>
                 <div class="alert-error">
@@ -88,7 +88,7 @@ if (isset($_SESSION['user_id'])) {
             <div id="register-form" class="tab-content active" style="display: block;">
                 <form action="inscription.php" method="POST" style="margin-top: 1rem;">
                     <div class="form-group">
-                        <label for="register-name">Nom</label>
+                        <label for="register-name">Nom complet</label>
                         <input type="text" id="register-name" name="name" required placeholder="Ex: Jean Dupont">
                     </div>
                     <div class="form-group" style="margin-top: 1rem;">
@@ -106,6 +106,17 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
     <script>
+    // 🛠️ CRÉATION DE LA FONCTION ATTENDUE PAR MODALS.JS
+    function showNotification(message, type) {
+        // Si l'inscription est un succès, on redirige vers les produits
+        if (type === 'success' || message.indexOf('réussie') !== -1) {
+            window.location.href = 'produits.php';
+        } else {
+            // En cas d'erreur, on l'affiche proprement en haut de la modale
+            alert(message);
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         var registerTrigger = document.getElementById('open-register-trigger');
         var accountModal = document.getElementById('account-modal');
@@ -113,7 +124,6 @@ if (isset($_SESSION['user_id'])) {
         if (registerTrigger && accountModal) {
             registerTrigger.addEventListener('click', function(e) {
                 e.preventDefault();
-                // Ouvre directement la vue inscription intégrée
                 accountModal.style.display = 'block';
             });
         }
