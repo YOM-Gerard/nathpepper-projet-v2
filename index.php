@@ -82,37 +82,41 @@ try {
                                     <h3><?php echo htmlspecialchars($p_name); ?></h3>
                                     <p class="product-desc"><?php echo htmlspecialchars($p_desc); ?></p>
                                     
-                                    <div class="product-meta-row">
-                                        <div class="product-price-weight">
-                                            <span class="product-price"><?php echo number_format($p_price, 2, ',', ' '); ?> €</span>
-                                            <span class="product-weight">(<?php 
-                                                if (isset($product['poids'])) {
-                                                    echo htmlspecialchars($product['poids'], ENT_QUOTES, 'UTF-8');
-                                                } elseif (isset($product['weight'])) {
-                                                    echo htmlspecialchars($product['weight'], ENT_QUOTES, 'UTF-8');
-                                                } else {
-                                                    echo '30'; 
-                                                }
-                                            ?>g)</span>
+                                    <div class="product-meta-row" style="display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 10px !important;">
+                                        <div class="product-price-weight" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                            <span class="product-price"><?php echo number_format((float)$p_price, 2, ',', ' '); ?> €</span>
+                                            <span class="product-weight">(<?php echo !empty($product['poids']) ? htmlspecialchars($product['poids'], ENT_QUOTES, 'UTF-8') : '30'; ?>g)</span>
                                         </div>
                                         
-                                        <?php if ($stock_actuel <= 0): ?>
-                                            <button class="btn-primary add-to-cart-btn out-of-stock" disabled style="background-color: #bbb !important; border-color: #bbb !important; cursor: not-allowed !important;">
-                                                Rupture
-                                            </button>
-                                        <?php else: ?>
-                                            <button class="btn-primary add-to-cart-btn" 
-                                                    id="btn-prod-<?php echo $p_id; ?>"
-                                                    data-stock="<?php echo $stock_actuel; ?>"
-                                                    onclick="addToCart(
-                                                        '<?php echo $p_id; ?>', 
-                                                        '<?php echo addslashes(htmlspecialchars($p_name, ENT_QUOTES, 'UTF-8')); ?>', 
-                                                        '<?php echo $p_price; ?>', 
-                                                        '<?php echo addslashes(htmlspecialchars($p_image, ENT_QUOTES, 'UTF-8')); ?>'
-                                                    )">
-                                                Ajouter au panier
-                                            </button>
-                                        <?php endif; ?>
+                                        <div style="display: flex; gap: 8px; width: 100%; align-items: center;">
+                                            <?php if ($stock_actuel <= 0): ?>
+                                                <button class="btn-primary add-to-cart-btn out-of-stock" disabled style="background-color: #bbb !important; border-color: #bbb !important; cursor: not-allowed !important; width: 100% !important;">
+                                                    Rupture
+                                                </button>
+                                            <?php else: ?>
+                                                <select id="qty-prod-<?php echo $p_id; ?>" style="padding: 10px; border: 1px solid #1a1b1c; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.9rem; background: #fff; cursor: pointer;">
+                                                    <?php 
+                                                    $max_options = min($stock_actuel, 5);
+                                                    for ($i = 1; $i <= $max_options; $i++): 
+                                                    ?>
+                                                        <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+                                                    <?php endfor; ?>
+                                                </select>
+
+                                                <button class="btn-primary add-to-cart-btn" 
+                                                        id="btn-prod-<?php echo $p_id; ?>"
+                                                        data-stock="<?php echo $stock_actuel; ?>"
+                                                        style="flex-grow: 1;"
+                                                        onclick="addToCart(
+                                                            '<?php echo $p_id; ?>', 
+                                                            '<?php echo addslashes(htmlspecialchars($p_name, ENT_QUOTES, 'UTF-8')); ?>', 
+                                                            '<?php echo $p_price; ?>', 
+                                                            '<?php echo addslashes(htmlspecialchars($p_image, ENT_QUOTES, 'UTF-8')); ?>'
+                                                        )">
+                                                    Ajouter
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
 
                                 </div>
