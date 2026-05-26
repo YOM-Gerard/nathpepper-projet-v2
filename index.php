@@ -68,6 +68,7 @@ try {
                             $p_name = $product['name'] ?? $product['nom'] ?? 'Poivre';
                             $p_price = $product['price'] ?? $product['prix'] ?? 0;
                             $p_desc = $product['description'] ?? '';
+                            $stock_actuel = isset($product['stock']) ? (int)$product['stock'] : 0;
                             
                             $db_image = $product['image_url'] ?? '';
                             $filename = pathinfo($db_image, PATHINFO_FILENAME);
@@ -95,14 +96,23 @@ try {
                                             ?>g)</span>
                                         </div>
                                         
-                                        <button class="btn-primary btn-add-cart btn-add-to-cart add-to-cart-btn" onclick="addToCart(
-                                            '<?php echo $p_id; ?>', 
-                                            '<?php echo addslashes($p_name); ?>', 
-                                            '<?php echo $p_price; ?>', 
-                                            '<?php echo addslashes($p_image); ?>'
-                                        )">
-                                            Ajouter au panier
-                                        </button>
+                                        <?php if ($stock_actuel <= 0): ?>
+                                            <button class="btn-primary add-to-cart-btn out-of-stock" disabled style="background-color: #bbb !important; border-color: #bbb !important; cursor: not-allowed !important;">
+                                                Rupture
+                                            </button>
+                                        <?php else: ?>
+                                            <button class="btn-primary add-to-cart-btn" 
+                                                    id="btn-prod-<?php echo $p_id; ?>"
+                                                    data-stock="<?php echo $stock_actuel; ?>"
+                                                    onclick="addToCart(
+                                                        '<?php echo $p_id; ?>', 
+                                                        '<?php echo addslashes(htmlspecialchars($p_name, ENT_QUOTES, 'UTF-8')); ?>', 
+                                                        '<?php echo $p_price; ?>', 
+                                                        '<?php echo addslashes(htmlspecialchars($p_image, ENT_QUOTES, 'UTF-8')); ?>'
+                                                    )">
+                                                Ajouter au panier
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
 
                                 </div>
@@ -132,7 +142,7 @@ try {
                         <div class="brand-values">
                             <div class="value-item">
                                 <h3>🌱 Éthique</h3>
-                                <p>Commerce équitable and respect des producteurs</p>
+                                <p>Commerce équitable et respect des producteurs</p>
                             </div>
                             <div class="value-item">
                                 <h3>🌍 Durable</h3>
@@ -199,3 +209,40 @@ try {
                 <button class="tab-btn" data-tab="register">Inscription</button>
             </div>
             <div id="login-form" class="tab-content active">
+                <form>
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Mot de passe</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Se connecter</button>
+                </form>
+            </div>
+            <div id="register-form" class="tab-content">
+                <form>
+                    <div class="form-group">
+                        <label for="register-name">Nom</label>
+                        <input type="text" id="register-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Mot de passe</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">S'inscrire</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cart.js"></script>
+    <script src="js/modals.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
