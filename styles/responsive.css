@@ -119,13 +119,8 @@
     }
     
     /* Typography */
-    h1 {
-        font-size: 2.5rem;
-    }
-    
-    h2 {
-        font-size: 2rem;
-    }
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 2rem; }
     
     /* Sections */
     .products-section, .brand-section, .contact-section {
@@ -188,4 +183,83 @@
         padding: 0 15px;
     }
     
-    /*
+    /* Navigation */
+    .nav-container {
+        padding: 0 15px;
+    }
+    
+    .logo {
+        height: 40px;
+    }
+    
+    .nav-actions {
+        gap: 0.5rem;
+    }
+    
+    /* Hero */
+    .hero {
+        padding: 100px 15px 40px;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    /* Typography */
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.8rem; }
+    h3 { font-size: 1.4rem; }
+    
+    /* Sections */
+    .products-section, .brand-section, .contact-section {
+        padding: 40px 0;
+    }
+    
+    /* Products Grid */
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .product-card {
+        margin: 0 auto;
+        max-width: 350px;
+    }
+    
+    /* ─── ALIGNEMENT HORIZONTAL ET RESPIRATION DU BLOC PRIX/POIDS ─── */
+    .product-meta-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin-top: 20px !important;
+        gap: 16px !important;
+    }
+
+    .product-price-weight {
+        display: flex !important;
+        align-items: baseline !important;
+        gap: 8px !important;
+        text-align: left !important;
+    }
+
+    .product-price {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 1.25rem !important;
+        font-weight: 600 !important;
+        color: #1a1b1c !important;
+        margin: 0 !important;
+    }
+
+    .product-weight {
+        font-size: 0.85rem !important;
+        color: #757575 !important;
+        font-weight: 400 !important;
+    }
+
+    /* ─── REPRODUCTION BOUTON OFFICIEL AVEC MARGE D'ISOLATION ─── */
+    .
