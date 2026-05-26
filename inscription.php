@@ -1,8 +1,6 @@
 <?php
 session_start();
-require_once 'includes/db.php'; // Charge l'instance PDO ($pdo)
-
-header('Content-Type: application/json');
+require_once 'includes/db.php'; // Charge ton instance PDO ($pdo)
 
 // Réception des données du formulaire HTML classique ($_POST)
 $firstname = trim($_POST['firstname'] ?? '');
@@ -12,7 +10,7 @@ $phone     = trim($_POST['phone'] ?? '');
 $address   = trim($_POST['address'] ?? '');
 $password  = $_POST['password'] ?? '';
 
-// Vérification de la présence de toutes les informations de livraison (CORRIGÉ !)
+// Vérification de la présence de toutes les informations de livraison
 if (empty($firstname) || empty($lastname) || empty($email) || empty($phone) || empty($address) || empty($password)) {
     $_SESSION['error_login'] = 'Veuillez renseigner tous les champs obligatoires pour configurer votre compte de livraison.';
     header('Location: connexion.php');
@@ -41,7 +39,7 @@ try {
     // 3. Reconstitution du Nom Complet pour la colonne 'name'
     $fullName = $firstname . ' ' . $lastname;
 
-    // 4. Écriture ordonnée dans la base de données (Chaque donnée dans sa colonne !)
+    // 4. Écriture ordonnée dans la base de données (Chaque donnée va dans SA colonne)
     $stmtInsert = $pdo->prepare("INSERT INTO users (name, email, password, phone, address) VALUES (:name, :email, :password, :phone, :address)");
     $stmtInsert->execute([
         'name'     => $fullName,
@@ -53,9 +51,9 @@ try {
 
     // 5. Enregistrement de la session utilisateur
     $_SESSION['user_id'] = $pdo->lastInsertId();
-    $_SESSION['user_name'] = $firstname; // Stocke le prénom pour saluer l'utilisateur dans le header
+    $_SESSION['user_name'] = $firstname; // Stocke le prénom pour le header
     
-    // Le message de confirmation personnalisé avec le prénom
+    // Le fameux message de confirmation vert personnalisé avec le prénom !
     $_SESSION['success_register'] = "✨ Félicitations " . htmlspecialchars($firstname) . ", vous êtes bien inscrit ! Votre compte de livraison a été configuré avec succès.";
 
     // Redirection directe vers la boutique
