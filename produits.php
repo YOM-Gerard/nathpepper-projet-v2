@@ -37,24 +37,38 @@ $products = $stmt->fetchAll();
                 <?php foreach ($products as $product): ?>
                     <div class="product-card">
                         <div class="products-image" style="width: 100%; height: 250px; overflow: hidden; display: flex; justify-content: center; align-items: center;">
-                            <img src="public/images/products/<?php echo pathinfo($product['image_url'], PATHINFO_FILENAME); ?>.jpg" alt="<?php echo $product['name']; ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                            <img src="public/images/products/<?php echo pathinfo($product['image_url'], PATHINFO_FILENAME); ?>.jpg" alt="<?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?>" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
                         <div class="product-info">
-                            <h3><?php echo $product['name']; ?></h3>
-                            <p class="product-description"><?php echo $product['description']; ?></p>
-                            <div class="product-bottom">
-                                <span class="product-price"><?php echo number_format($product['price'], 2, ',', ' '); ?> €</span>
-                                <button class="btn-add-cart" onclick="addToCart(<?php echo $product['id']; ?>, '<?php echo addslashes($product['name']); ?>', <?php echo $product['price']; ?>, 'public/images/products/<?php echo pathinfo($product['image_url'], PATHINFO_FILENAME); ?>.jpg')">
+                            <h3><?php echo htmlspecialchars($product['name'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                            <p class="product-description"><?php echo htmlspecialchars($product['description'], ENT_QUOTES, 'UTF-8'); ?></p>
+                            
+                            <div class="product-meta-row">
+                                <div class="product-price-weight">
+                                    <span class="product-price"><?php echo number_format($product['price'], 2, ',', ' '); ?> €</span>
+                                    
+                                    <span class="product-weight">(<?php 
+                                        if (isset($product['poids'])) {
+                                            echo htmlspecialchars($product['poids'], ENT_QUOTES, 'UTF-8');
+                                        } elseif (isset($product['weight'])) {
+                                            echo htmlspecialchars($product['weight'], ENT_QUOTES, 'UTF-8');
+                                        } else {
+                                            echo '20'; 
+                                        }
+                                    ?>g)</span>
+                                </div>
+                                
+                                <button class="btn-primary btn-add-cart btn-add-to-cart add-to-cart-btn" onclick="addToCart(<?php echo (int)$product['id']; ?>, '<?php echo htmlspecialchars(addslashes($product['name']), ENT_QUOTES, 'UTF-8'); ?>', <?php echo (float)$product['price']; ?>, 'public/images/products/<?php echo pathinfo($product['image_url'], PATHINFO_FILENAME); ?>.jpg')">
                                     Ajouter au panier
                                 </button>
                             </div>
+
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
         </section>
     </main>
-
 
     <?php require_once 'includes/footer.php'; ?>
 
