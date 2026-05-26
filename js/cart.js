@@ -7,7 +7,6 @@ if (typeof cart === 'undefined') {
 
 // 🛠️ Fonction utilitaire pour afficher une notification premium à l'écran
 function showStockNotification(message, isWarning = false) {
-    // Supprime l'ancienne notification si elle existe déjà
     const oldNotification = document.getElementById('stock-toast');
     if (oldNotification) oldNotification.remove();
 
@@ -15,7 +14,6 @@ function showStockNotification(message, isWarning = false) {
     toast.id = 'stock-toast';
     toast.textContent = message;
     
-    // Style de la notification volante
     toast.style.cssText = `
         position: fixed;
         top: 100px;
@@ -34,7 +32,6 @@ function showStockNotification(message, isWarning = false) {
 
     document.body.appendChild(toast);
 
-    // Disparition automatique après 3,5 secondes
     setTimeout(() => {
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
@@ -136,3 +133,136 @@ function renderCartItems() {
     }
     
     let htmlContent = '';
+    let grandTotal = 0;
+    
+    window.cart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        grandTotal += itemTotal;
+        
+        const originalButton = document.getElementById(`btn-prod-${item.id}`);
+        let maxStock = 999;
+        if (originalButton) {
+            maxStock = parseInt(originalButton.getAttribute('data-stock')) || 0;
+        }
+
+        const isPlusDisabled = item.quantity >= maxStock ? 'disabled style="opacity: 0.3; cursor: not-allowed;"' : '';
+        
+        htmlContent += `
+            <div class="cart-item-row" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #eee;">
+                <div class="cart-item-info" style="display: flex; align-items: center; gap: 15px;">
+                    <img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                    <div>
+                        <h4 style="margin: 0; font-family: 'Playfair Display', serif;">${item.name}</h4>
+                        <span style="color: #666; font-size: 0.9rem;">${item.price.toFixed(2).replace('.', ',')} € / unité</span>
+                    </div>
+                </div>
+                
+                <div class="cart-item-actions" style="display: flex; align-items: center; gap: 15px;">
+                    <div class="qty-controls" style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; background: #fff;">
+                        <button onclick="changeQuantityMinus(${index})" style="background: none; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem;">-</button>
+                        <span style="padding: 0 5px; font-weight: 500; min-width: 20px; text-align: center;">${item.quantity}</span>
+                        <button onclick="changeQuantityPlus(${index})" ${isPlusDisabled} style="background: none; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem;">+</button>
+                    </div>
+                    
+                    <span class="item-total-price" style="font-weight: 600; min-width: 70px; text-align: right;">${itemTotal.toFixed(2).replace('.', ',')} €</span>
+                    
+                    <button onclick="removeProductFromCart(${index})" style="background: none; border: none; color: #cc0000; cursor: pointer; font-size: 1.2rem; padding: 0 5px;" title="Supprimer l'article">🗑️</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    cartItemsContainer.innerHTML = htmlContent;
+    if (cartTotalElement) {
+        cartTotalElement.textContent = grandTotal.toFixed(2).replace('.', ',') + ' €';
+    }
+}
+
+// 4. Augmenter la quantité (+1) avec contrôle de sécurité
+function changeQuantityPlus(index) {
+    const item = window.cart[index];
+    const originalButton = document.getElementById(`btn-prod-${item.id}`);
+    let maxStock = 999;
+    
+    if (originalButton) {
+        maxStock = parseInt(originalButton.getAttribute('data-stock')) || 0;
+    }
+
+    if (item.quantity < maxStock) {
+        window.cart[index].quantity += 1;
+        
+        if (window.cart[index].quantity === maxStock) {
+            showStockNotification(`✨ Dernier exemplaire disponible atteint pour "${item.name}".`);
+        }
+        saveAndRefreshCart();
+    } else {
+        showStockNotification(`Limite de stock atteinte pour "${item.name}".`, true);
+    }
+}
+
+// 5. Diminuer la quantité (-1)
+function changeQuantityMinus(index) {
+    const item = window.cart[index];
+    window.cart[index].quantity -= 1;
+    
+    if (window.cart[index].quantity <= 0) {
+        window.cart.splice(index, 1);
+    }
+    
+    const originalButton = document.getElementById(`btn-prod-${item.id}`);
+    if (originalButton) {
+        originalButton.innerText = "Ajouter au panier";
+        originalButton.disabled = false;
+        originalButton.style.cssText = "";
+    }
+
+    saveAndRefreshCart();
+}
+
+// 6. Supprimer complètement un produit
+function removeProductFromCart(index) {
+    const item = window.cart[index];
+    window.cart.splice(index, 1);
+    
+    const originalButton = document.getElementById(`btn-prod-${item.id}`);
+    if (originalButton) {
+        originalButton.innerText = "Ajouter au panier";
+        originalButton.disabled = false;
+        originalButton.style.cssText = "";
+    }
+    
+    saveAndRefreshCart();
+}
+
+// 7. Fonction utilitaire pour synchroniser les données et redessiner l'interface
+function saveAndRefreshCart() {
+    localStorage.setItem('cart', JSON.stringify(window.cart));
+    updateCartCount();
+    renderCartItems();
+}
+
+// 8. Préparation et écouteurs d'événements au chargement DOM
+document.addEventListener('DOMContentLoaded', () => {
+    updateCartCount();
+    
+    const cartHeaderBtn = document.getElementById('btn-cart') || document.querySelector('.nav-icon[id*="cart"]');
+    if (cartHeaderBtn) {
+        cartHeaderBtn.addEventListener('click', renderCartItems);
+    }
+    
+    const clearCartBtn = document.getElementById('clear-cart');
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', () => {
+            window.cart.forEach(item => {
+                const originalButton = document.getElementById(`btn-prod-${item.id}`);
+                if (originalButton) {
+                    originalButton.innerText = "Ajouter au panier";
+                    originalButton.disabled = false;
+                    originalButton.style.cssText = "";
+                }
+            });
+            window.cart = [];
+            saveAndRefreshCart();
+        });
+    }
+});
