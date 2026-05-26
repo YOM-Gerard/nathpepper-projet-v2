@@ -105,42 +105,42 @@ if (isset($_SESSION['user_id'])) {
                 <button class="tab-btn active">Inscription</button>
             </div>
             
-            <div id="custom-register-block" class="tab-content active" style="display: block; max-height: 60vh; overflow-y: auto; padding-right: 5px; margin-top: 15px;">
+            <div id="secure-register-block" style="max-height: 60vh; overflow-y: auto; padding-right: 5px; margin-top: 15px;">
                 <div id="modal-error-box" class="alert-error" style="display: none;"></div>
                 
-                <form id="standalone-register-delivery-form" method="POST">
+                <form id="nathpepper-independent-form" onsubmit="return false;">
                     <div style="display: flex; gap: 10px; margin-bottom: 12px;">
                         <div class="form-group" style="flex: 1;">
                             <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Prénom</label>
-                            <input type="text" id="ins-firstname" required placeholder="Jean" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                            <input type="text" id="secure-firstname" required placeholder="Jean" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                         </div>
                         <div class="form-group" style="flex: 1;">
                             <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Nom</label>
-                            <input type="text" id="ins-lastname" required placeholder="Dupont" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                            <input type="text" id="secure-lastname" required placeholder="Dupont" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                         </div>
                     </div>
                     
                     <div class="form-group" style="margin-bottom: 12px;">
                         <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Adresse Email</label>
-                        <input type="email" id="ins-email" required placeholder="jean.dupont@exemple.com" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <input type="email" id="secure-email" required placeholder="jean.dupont@exemple.com" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
 
                     <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Téléphone de livraison</label>
-                        <input type="tel" id="ins-phone" required placeholder="06 12 34 56 78" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Numéro de téléphone</label>
+                        <input type="tel" id="secure-phone" required placeholder="06 12 34 56 78" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
 
                     <div class="form-group" style="margin-bottom: 12px;">
-                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Adresse postale complète</label>
-                        <textarea id="ins-address" required placeholder="Numéro de rue, code postal, ville, appartement..." rows="3" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; resize: vertical;"></textarea>
+                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Adresse complète de livraison</label>
+                        <textarea id="secure-address" required placeholder="Numéro, rue, code postal, ville..." rows="3" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; resize: vertical;"></textarea>
                     </div>
 
                     <div class="form-group" style="margin-bottom: 15px;">
                         <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Mot de passe</label>
-                        <input type="password" id="ins-password" required placeholder="••••••••" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                        <input type="password" id="secure-password" required placeholder="••••••••" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
                     
-                    <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-weight: 600;">S'inscrire</button>
+                    <button type="button" id="secure-submit-btn" class="btn-primary" style="width: 100%; padding: 12px; font-weight: 600;">S'inscrire</button>
                 </form>
             </div>
         </div>
@@ -150,7 +150,7 @@ if (isset($_SESSION['user_id'])) {
     document.addEventListener('DOMContentLoaded', function() {
         var trigger = document.getElementById('open-register-trigger');
         var modal = document.getElementById('account-modal');
-        var form = document.getElementById('standalone-register-delivery-form');
+        var submitBtn = document.getElementById('secure-submit-btn');
         var errorBox = document.getElementById('modal-error-box');
 
         if (trigger && modal) {
@@ -160,23 +160,30 @@ if (isset($_SESSION['user_id'])) {
             });
         }
 
-        if (form) {
-            form.addEventListener('submit', function(e) {
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                e.stopPropagation(); // Coupe définitivement l'interception de modals.js
+                e.stopPropagation();
 
                 errorBox.style.display = 'none';
 
                 var payload = {
-                    firstname: document.getElementById('ins-firstname').value.trim(),
-                    lastname: document.getElementById('ins-lastname').value.trim(),
-                    email: document.getElementById('ins-email').value.trim(),
-                    phone: document.getElementById('ins-phone').value.trim(),
-                    address: document.getElementById('ins-address').value.trim(),
-                    password: document.getElementById('ins-password').value
+                    firstname: document.getElementById('secure-firstname').value.trim(),
+                    lastname: document.getElementById('secure-lastname').value.trim(),
+                    email: document.getElementById('secure-email').value.trim(),
+                    phone: document.getElementById('secure-phone').value.trim(),
+                    address: document.getElementById('secure-address').value.trim(),
+                    password: document.getElementById('secure-password').value
                 };
 
-                // FIX SYNTAXE : Entête corrigée sans deux-points internes erronés
+                // Vérification basique côté client avant envoi
+                if (!payload.firstname || !payload.lastname || !payload.email || !payload.phone || !payload.address || !payload.password) {
+                    errorBox.textContent = "Veuillez remplir tous les champs.";
+                    errorBox.style.display = 'block';
+                    return;
+                }
+
+                // Envoi Fetch natif corrigé
                 fetch('inscription.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -185,18 +192,18 @@ if (isset($_SESSION['user_id'])) {
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
                     if (data.success) {
-                        // Succès complet -> On recharge la page pour afficher l'alerte verte
-                        window.location.reload();
+                        // Succès -> Redirection vers la boutique
+                        window.location.href = 'produits.php';
                     } else {
                         errorBox.textContent = data.message;
                         errorBox.style.display = 'block';
                     }
                 })
                 .catch(function(err) {
-                    errorBox.textContent = "Erreur de communication avec le serveur d'inscription.";
+                    errorBox.textContent = "Erreur réseau lors de l'inscription.";
                     errorBox.style.display = 'block';
                 });
-            }, true);
+            });
         }
     });
     </script>
