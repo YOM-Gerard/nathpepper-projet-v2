@@ -50,8 +50,12 @@ function updateCartCount() {
 // 2. La fonction qui s'enclenche quand on clique sur "Ajouter au panier"
 function addToCart(id, name, price, imageUrl) {
     const button = document.getElementById(`btn-prod-${id}`);
-    let maxStock = 999; 
+    const qtySelect = document.getElementById(`qty-prod-${id}`);
     
+    // 🛠️ On récupère la valeur choisie dans le menu déroulant (vaut 1 si absent)
+    const quantityToAdd = qtySelect ? parseInt(qtySelect.value) : 1;
+    
+    let maxStock = 999; 
     if (button) {
         maxStock = parseInt(button.getAttribute('data-stock')) || 0;
     }
@@ -63,22 +67,20 @@ function addToCart(id, name, price, imageUrl) {
         currentQuantityInCart = window.cart[existingProductIndex].quantity;
     }
 
-    // SÉCURITÉ : Limite de stock déjà atteinte
-    if (currentQuantityInCart >= maxStock) {
-        showStockNotification(`Désolé, seuls ${maxStock} exemplaires sont disponibles.`, true);
-        if (button) {
-            button.innerText = "Rupture";
-            button.disabled = true;
-            button.style.setProperty('background-color', '#bbb', 'important');
-            button.style.setProperty('border-color', '#bbb', 'important');
-            button.style.setProperty('cursor', 'not-allowed', 'important');
+    // SÉCURITÉ : On vérifie si la quantité ajoutée dépasse le stock disponible
+    if (currentQuantityInCart + quantityToAdd > maxStock) {
+        const dispoRestant = maxStock - currentQuantityInCart;
+        if (dispoRestant <= 0) {
+            showStockNotification(`Désolé, seuls ${maxStock} exemplaires sont disponibles au total.`, true);
+        } else {
+            showStockNotification(`Désolé, il ne reste que ${dispoRestant} exemplaire(s) disponible(s) pour votre panier.`, true);
         }
         return; 
     }
 
-    // Incrémentation ou ajout du produit
+    // Incrémentation ou ajout global du produit avec la quantité choisie
     if (existingProductIndex > -1) {
-        window.cart[existingProductIndex].quantity += 1;
+        window.cart[existingProductIndex].quantity += quantityToAdd;
         currentQuantityInCart = window.cart[existingProductIndex].quantity;
     } else {
         window.cart.push({
@@ -86,28 +88,33 @@ function addToCart(id, name, price, imageUrl) {
             name: name,
             price: parseFloat(price),
             image: imageUrl,
-            quantity: 1
+            quantity: quantityToAdd
         });
-        currentQuantityInCart = 1;
+        currentQuantityInCart = quantityToAdd;
     }
 
-    // Notification utilisateur au moment de l'ajout
+    // Notification utilisateur dynamique
     const stockRestant = maxStock - currentQuantityInCart;
     if (stockRestant === 0) {
-        showStockNotification(`✨ Vous avez ajouté le dernier exemplaire de "${name}" !`);
+        showStockNotification(`✨ Vous avez ajouté les derniers exemplaires de "${name}" !`);
     } else if (stockRestant <= 2) {
         showStockNotification(`🔥 Plus que ${stockRestant} articles disponibles pour ce poivre !`);
     } else {
-        showStockNotification(`✓ "${name}" a bien été ajouté au panier.`);
+        showStockNotification(`✓ ${quantityToAdd} x "${name}" ajouté(s) au panier.`);
     }
 
-    // Verrouillage immédiat du bouton de la grille si le stock est épuisé
-    if (currentQuantityInCart >= maxStock && button) {
-        button.innerText = "Rupture";
-        button.disabled = true;
-        button.style.setProperty('background-color', '#bbb', 'important');
-        button.style.setProperty('border-color', '#bbb', 'important');
-        button.style.setProperty('cursor', 'not-allowed', 'important');
+    // Verrouillage immédiat du bouton et du sélecteur si le stock est épuisé
+    if (currentQuantityInCart >= maxStock) {
+        if (button) {
+            button.innerText = "Rupture";
+            button.disabled = true;
+            button.style.setProperty('background-color', '#bbb', 'important');
+            button.style.setProperty('border-color', '#bbb', 'important');
+            button.style.setProperty('cursor', 'not-allowed', 'important');
+        }
+        if (qtySelect) {
+            qtySelect.disabled = true;
+        }
     }
 
     localStorage.setItem('cart', JSON.stringify(window.cart));
@@ -150,119 +157,4 @@ function renderCartItems() {
         htmlContent += `
             <div class="cart-item-row" style="display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #eee;">
                 <div class="cart-item-info" style="display: flex; align-items: center; gap: 15px;">
-                    <img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
-                    <div>
-                        <h4 style="margin: 0; font-family: 'Playfair Display', serif;">${item.name}</h4>
-                        <span style="color: #666; font-size: 0.9rem;">${item.price.toFixed(2).replace('.', ',')} € / unité</span>
-                    </div>
-                </div>
-                
-                <div class="cart-item-actions" style="display: flex; align-items: center; gap: 15px;">
-                    <div class="qty-controls" style="display: flex; align-items: center; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; background: #fff;">
-                        <button onclick="changeQuantityMinus(${index})" style="background: none; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem;">-</button>
-                        <span style="padding: 0 5px; font-weight: 500; min-width: 20px; text-align: center;">${item.quantity}</span>
-                        <button onclick="changeQuantityPlus(${index})" ${isPlusDisabled} style="background: none; border: none; padding: 5px 12px; cursor: pointer; font-weight: bold; font-size: 1.1rem;">+</button>
-                    </div>
-                    
-                    <span class="item-total-price" style="font-weight: 600; min-width: 70px; text-align: right;">${itemTotal.toFixed(2).replace('.', ',')} €</span>
-                    
-                    <button onclick="removeProductFromCart(${index})" style="background: none; border: none; color: #cc0000; cursor: pointer; font-size: 1.2rem; padding: 0 5px;" title="Supprimer l'article">🗑️</button>
-                </div>
-            </div>
-        `;
-    });
-    
-    cartItemsContainer.innerHTML = htmlContent;
-    if (cartTotalElement) {
-        cartTotalElement.textContent = grandTotal.toFixed(2).replace('.', ',') + ' €';
-    }
-}
-
-// 4. Augmenter la quantité (+1) avec contrôle de sécurité
-function changeQuantityPlus(index) {
-    const item = window.cart[index];
-    const originalButton = document.getElementById(`btn-prod-${item.id}`);
-    let maxStock = 999;
-    
-    if (originalButton) {
-        maxStock = parseInt(originalButton.getAttribute('data-stock')) || 0;
-    }
-
-    if (item.quantity < maxStock) {
-        window.cart[index].quantity += 1;
-        
-        if (window.cart[index].quantity === maxStock) {
-            showStockNotification(`✨ Dernier exemplaire disponible atteint pour "${item.name}".`);
-        }
-        saveAndRefreshCart();
-    } else {
-        showStockNotification(`Limite de stock atteinte pour "${item.name}".`, true);
-    }
-}
-
-// 5. Diminuer la quantité (-1)
-function changeQuantityMinus(index) {
-    const item = window.cart[index];
-    window.cart[index].quantity -= 1;
-    
-    if (window.cart[index].quantity <= 0) {
-        window.cart.splice(index, 1);
-    }
-    
-    const originalButton = document.getElementById(`btn-prod-${item.id}`);
-    if (originalButton) {
-        originalButton.innerText = "Ajouter au panier";
-        originalButton.disabled = false;
-        originalButton.style.cssText = "";
-    }
-
-    saveAndRefreshCart();
-}
-
-// 6. Supprimer complètement un produit
-function removeProductFromCart(index) {
-    const item = window.cart[index];
-    window.cart.splice(index, 1);
-    
-    const originalButton = document.getElementById(`btn-prod-${item.id}`);
-    if (originalButton) {
-        originalButton.innerText = "Ajouter au panier";
-        originalButton.disabled = false;
-        originalButton.style.cssText = "";
-    }
-    
-    saveAndRefreshCart();
-}
-
-// 7. Fonction utilitaire pour synchroniser les données et redessiner l'interface
-function saveAndRefreshCart() {
-    localStorage.setItem('cart', JSON.stringify(window.cart));
-    updateCartCount();
-    renderCartItems();
-}
-
-// 8. Préparation et écouteurs d'événements au chargement DOM
-document.addEventListener('DOMContentLoaded', () => {
-    updateCartCount();
-    
-    const cartHeaderBtn = document.getElementById('btn-cart') || document.querySelector('.nav-icon[id*="cart"]');
-    if (cartHeaderBtn) {
-        cartHeaderBtn.addEventListener('click', renderCartItems);
-    }
-    
-    const clearCartBtn = document.getElementById('clear-cart');
-    if (clearCartBtn) {
-        clearCartBtn.addEventListener('click', () => {
-            window.cart.forEach(item => {
-                const originalButton = document.getElementById(`btn-prod-${item.id}`);
-                if (originalButton) {
-                    originalButton.innerText = "Ajouter au panier";
-                    originalButton.disabled = false;
-                    originalButton.style.cssText = "";
-                }
-            });
-            window.cart = [];
-            saveAndRefreshCart();
-        });
-    }
-});
+                    <img src="${item
