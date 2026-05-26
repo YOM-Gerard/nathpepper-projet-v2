@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -126,7 +128,7 @@ session_start();
                             </tr>
                         </thead>
                         <tbody id="cart-table-body">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
 
@@ -161,5 +163,34 @@ session_start();
 
     <script src="js/cart.js"></script>
     <script src="js/panier-visuel.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkoutBtn = document.getElementById('checkout-button');
+        
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', function() {
+                const totalPriceEl = document.getElementById('cart-total-price');
+                if (!totalPriceEl) return;
+
+                const totalText = totalPriceEl.textContent;
+                const totalNumeric = parseFloat(totalText.replace(/[^\d.]/g, '')) || 0;
+
+                fetch('includes/sauvegarder-total.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ total: totalNumeric })
+                })
+                .then(() => {
+                    window.location.href = 'commande.php';
+                })
+                .catch(err => {
+                    console.error("Erreur de sauvegarde de session:", err);
+                    window.location.href = 'commande.php';
+                });
+            });
+        }
+    });
+    </script>
 </body>
 </html>
