@@ -22,9 +22,9 @@ if (isset($_SESSION['user_id'])) {
             background-color: #ffebee;
             color: #c62828;
             padding: 12px;
-            border-radius: var(--border-radius);
+            border-radius: 4px;
             margin-bottom: 1.5rem;
-            font-family: var(--font-secondary);
+            font-family: 'Inter', sans-serif;
             font-size: 0.9rem;
             text-align: center;
             border: 1px solid #ef9a9a;
@@ -33,9 +33,9 @@ if (isset($_SESSION['user_id'])) {
             background-color: #e8f5e9;
             color: #2e7d32;
             padding: 12px;
-            border-radius: var(--border-radius);
+            border-radius: 4px;
             margin-bottom: 1.5rem;
-            font-family: var(--font-secondary);
+            font-family: 'Inter', sans-serif;
             font-size: 0.9rem;
             text-align: center;
             border: 1px solid #a5d6a7;
@@ -57,7 +57,7 @@ if (isset($_SESSION['user_id'])) {
                 <div class="alert-error">
                     <?php 
                     echo $_SESSION['error_login']; 
-                    unset($_SESSION['error_login']);
+                    unset($_SESSION['error_login']); 
                     ?>
                 </div>
             <?php endif; ?>
@@ -66,7 +66,7 @@ if (isset($_SESSION['user_id'])) {
                 <div class="alert-success">
                     <?php 
                     echo $_SESSION['success_register']; 
-                    unset($_SESSION['success_register']);
+                    unset($_SESSION['success_register']); 
                     ?>
                 </div>
             <?php endif; ?>
@@ -95,50 +95,52 @@ if (isset($_SESSION['user_id'])) {
     <?php require_once 'includes/footer.php'; ?>
 
     <div id="account-modal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 550px;">
+        <div class="modal-content" style="max-width: 500px; border-radius: 8px;">
             <span class="close" onclick="document.getElementById('account-modal').style.display='none'">&times;</span>
             <div class="modal-header">
                 <h2>Mon Compte</h2>
             </div>
             <div class="account-tabs">
-                <button class="tab-btn" data-tab="login" onclick="window.location.href='connexion.php'">Connexion</button>
-                <button class="tab-btn active" data-tab="register">Inscription</button>
+                <button class="tab-btn" onclick="window.location.href='connexion.php'">Connexion</button>
+                <button class="tab-btn active">Inscription</button>
             </div>
             
-            <div id="register-form" class="tab-content active" style="display: block; max-height: 70vh; overflow-y: auto; padding-right: 5px;">
-                <form id="force-native-register" action="inscription.php" method="POST" style="margin-top: 1rem;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group">
-                            <label for="reg-firstname">Prénom</label>
-                            <input type="text" id="reg-firstname" name="firstname" required placeholder="Ex: Jean">
+            <div id="custom-register-block" class="tab-content active" style="display: block; max-height: 60vh; overflow-y: auto; padding-right: 5px; margin-top: 15px;">
+                <div id="modal-error-box" class="alert-error" style="display: none;"></div>
+                
+                <form id="standalone-register-delivery-form" method="POST">
+                    <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Prénom</label>
+                            <input type="text" id="ins-firstname" required placeholder="Jean" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                         </div>
-                        <div class="form-group">
-                            <label for="reg-lastname">Nom</label>
-                            <input type="text" id="reg-lastname" name="lastname" required placeholder="Ex: Dupont">
+                        <div class="form-group" style="flex: 1;">
+                            <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Nom</label>
+                            <input type="text" id="ins-lastname" required placeholder="Dupont" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                         </div>
                     </div>
                     
-                    <div class="form-group" style="margin-top: 1rem;">
-                        <label for="reg-email">Email</label>
-                        <input type="email" id="reg-email" name="email" required placeholder="jean.dupont@exemple.com">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Adresse Email</label>
+                        <input type="email" id="ins-email" required placeholder="jean.dupont@exemple.com" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
 
-                    <div class="form-group" style="margin-top: 1rem;">
-                        <label for="reg-phone">Numéro de téléphone</label>
-                        <input type="tel" id="reg-phone" name="phone" required placeholder="Ex: 06 12 34 56 78">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Téléphone de livraison</label>
+                        <input type="tel" id="ins-phone" required placeholder="06 12 34 56 78" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
 
-                    <div class="form-group" style="margin-top: 1rem;">
-                        <label for="reg-address">Adresse complète de livraison</label>
-                        <textarea id="reg-address" name="address" required placeholder="Rue, code postal, ville, bâtiment..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: var(--border-radius); font-family: inherit; resize: vertical;" rows="3"></textarea>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Adresse postale complète</label>
+                        <textarea id="ins-address" required placeholder="Numéro de rue, code postal, ville, appartement..." rows="3" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; resize: vertical;"></textarea>
                     </div>
 
-                    <div class="form-group" style="margin-top: 1rem;">
-                        <label for="reg-password">Mot de passe</label>
-                        <input type="password" id="reg-password" name="password" required placeholder="••••••••">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="display: block; font-size: 0.85rem; font-weight: 500; margin-bottom: 4px;">Mot de passe</label>
+                        <input type="password" id="ins-password" required placeholder="••••••••" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
                     </div>
                     
-                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1.5rem;">S'inscrire</button>
+                    <button type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-weight: 600;">S'inscrire</button>
                 </form>
             </div>
         </div>
@@ -146,22 +148,55 @@ if (isset($_SESSION['user_id'])) {
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var registerTrigger = document.getElementById('open-register-trigger');
-        var accountModal = document.getElementById('account-modal');
-        var registerForm = document.getElementById('force-native-register');
-        
-        if (registerTrigger && accountModal) {
-            registerTrigger.addEventListener('click', function(e) {
+        var trigger = document.getElementById('open-register-trigger');
+        var modal = document.getElementById('account-modal');
+        var form = document.getElementById('standalone-register-delivery-form');
+        var errorBox = document.getElementById('modal-error-box');
+
+        if (trigger && modal) {
+            trigger.addEventListener('click', function(e) {
                 e.preventDefault();
-                accountModal.style.display = 'block';
+                modal.style.display = 'block';
             });
         }
 
-        // Neutralise l'interception AJAX globale de modals.js
-        if (registerForm) {
-            registerForm.addEventListener('submit', function(e) {
-                e.stopPropagation();
-            });
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Coupe définitivement l'interception de modals.js
+
+                errorBox.style.display = 'none';
+
+                var payload = {
+                    firstname: document.getElementById('ins-firstname').value.trim(),
+                    lastname: document.getElementById('ins-lastname').value.trim(),
+                    email: document.getElementById('ins-email').value.trim(),
+                    phone: document.getElementById('ins-phone').value.trim(),
+                    address: document.getElementById('ins-address').value.trim(),
+                    password: document.getElementById('ins-password').value
+                };
+
+                // FIX SYNTAXE : Entête corrigée sans deux-points internes erronés
+                fetch('inscription.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        // Succès complet -> On recharge la page pour afficher l'alerte verte
+                        window.location.reload();
+                    } else {
+                        errorBox.textContent = data.message;
+                        errorBox.style.display = 'block';
+                    }
+                })
+                .catch(function(err) {
+                    errorBox.textContent = "Erreur de communication avec le serveur d'inscription.";
+                    errorBox.style.display = 'block';
+                });
+            }, true);
         }
     });
     </script>

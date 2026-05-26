@@ -1,81 +1,64 @@
 <?php
 session_start();
-require_once 'includes/db.php'; // Charge la variable $pdo
+require_once 'includes/db.php'; // Charge l'instance $pdo de ta base de données
 
-// On récupère les données du formulaire classique (POST)
-$firstname = trim($_POST['firstname'] ?? '');
-$lastname = trim($_POST['lastname'] ?? '');
-$email = trim($_POST['email'] ?? '');
-$phone = trim($_POST['phone'] ?? '');
-$address = trim($_POST['address'] ?? '');
-$password = $_POST['password'] ?? '';
+header('Content-Type: application/json');
 
-// On assemble le prénom et le nom pour la colonne 'name' globale
-$fullName = $firstname . ' ' . $lastname;
+// Récupération sécurisée du flux JSON asynchrone
+$data = json_decode(file_get_contents('php://input'), true);
 
-// Vérification de sécurité des données reçues
-if (empty($firstname) || empty($lastname) || empty($email) || empty($password) || empty($phone) || empty($address)) {
-    $_SESSION['error_login'] = 'Veuillez remplir tous les champs obligatoires (Prénom, Nom, Email, Téléphone, Adresse, Mot de passe).';
-    header('Location: connexion.php');
-    exit();
+$firstname = trim($data['firstname'] ?? '');
+$lastname  = trim($data['lastname'] ?? '');
+$email     = trim($data['email'] ?? '');
+$phone     = trim($data['phone'] ?? '');
+$address   = trim($data['address'] ?? '');
+$password  = $data['password'] ?? '';
+
+// Contrôle de sécurité des champs requis pour l'expédition
+if (empty($firstname) || empty($lastname) || empty($email) || empty($phone) || empty($address) || empty($password)) {
+    echo json_encode(['success' => false, 'message' => 'Veuillez renseigner tous les champs requis pour la livraison.']);
+    exit;
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $_SESSION['error_login'] = "Le format de l'adresse email est invalide.";
-    header('Location: connexion.php');
-    exit();
+    echo json_encode(['success' => false, 'message' => 'Le format de votre adresse email est invalide.']);
+    exit;
 }
 
 try {
-    // 1. Vérifier si l'adresse email existe déjà
+    // 1. On s'assure que l'adresse email n'est pas déjà prise
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = :email");
     $stmt->execute(['email' => $email]);
     if ($stmt->fetch()) {
-        $_SESSION['error_login'] = 'Cette adresse email est déjà associée à un compte.';
-        header('Location: connexion.php');
-        exit();
+        echo json_encode(['success' => false, 'message' => 'Cette adresse email est déjà rattachée à un compte existant.']);
+        exit;
     }
 
-    // 2. Sécuriser le mot de passe par hachage
+    // 2. Cryptage de sécurité du mot de passe
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-    // 3. Insérer le nouvel utilisateur avec toutes ses coordonnées
-    // Note : Si ta table possède des colonnes spécifiques pour phone et address, ajoute-les ici.
-    // Sinon, cette structure écrit de manière sécurisée les éléments de base.
+    // 3. Concaténation élégante pour enregistrer le profil de livraison complet
+    $fullProfileName = $firstname . ' ' . $lastname . ' (Tél: ' . $phone . ' - Exp: ' . $address . ')';
+
+    // 4. Écriture immédiate dans la base de données
     $stmtInsert = $pdo->prepare("INSERT INTO users (name, email, password) VALUES (:name, :email, :password)");
     $stmtInsert->execute([
-        'name' => $fullName,
-        'email' => $email,
+        'name'     => $fullProfileName,
+        'email'    => $email,
         'password' => $hashedPassword
     ]);
 
-    // Enregistrement de l'ID généré
-    $newUserId = $pdo->lastInsertId();
+    // 5. Initialisation des cookies de session
+    $_SESSION['user_id'] = $pdo->lastInsertId();
+    $_SESSION['user_name'] = $firstname;
+    
+    // Message flash de confirmation verte en haut de la page de connexion
+    $_SESSION['success_register'] = "✨ Félicitations " . htmlspecialchars($firstname) . ", vous êtes bien inscrit ! Votre compte de livraison premium a été configuré avec succès.";
 
-    // 💡 Optionnel : Si tu as des colonnes 'phone' et 'address' dans ta table 'users',
-    // décommente les lignes ci-dessous pour les mettre à jour en même temps :
-    /*
-    $stmtUpdateFields = $pdo->prepare("UPDATE users SET phone = :phone, address = :address WHERE id = :id");
-    $stmtUpdateFields->execute([
-        'phone' => $phone,
-        'address' => $address,
-        'id' => $newUserId
-    ]);
-    */
-
-    // 4. Initialisation de la session de connexion automatique
-    $_SESSION['user_id'] = $newUserId;
-    $_SESSION['user_name'] = $firstname; // On stocke uniquement le prénom pour saluer chaleureusement
-
-    // 5. Création du message de succès demandé !
-    $_SESSION['success_register'] = "Félicitations " . htmlspecialchars($firstname) . ", vous êtes bien inscrit ! Votre espace client a été créé avec succès.";
-
-    // Redirection directe vers la boutique
-    header('Location: produits.php');
-    exit();
+    echo json_encode(['success' => true, 'message' => 'Compte créé !']);
+    exit;
 
 } catch (Exception $e) {
-    $_SESSION['error_login'] = 'Erreur lors de l\'enregistrement en base de données : ' . $e->getMessage();
-    header('Location: connexion.php');
-    exit();
+    echo json_encode(['success' => false, 'message' => 'Erreur fatale base de données : ' . $e->getMessage()]);
+    exit;
 }
