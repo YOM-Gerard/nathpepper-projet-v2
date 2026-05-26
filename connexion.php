@@ -29,6 +29,17 @@ if (isset($_SESSION['user_id'])) {
             text-align: center;
             border: 1px solid #ef9a9a;
         }
+        .alert-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            font-family: var(--font-secondary);
+            font-size: 0.9rem;
+            text-align: center;
+            border: 1px solid #a5d6a7;
+        }
     </style>
 </head>
 <body>
@@ -46,7 +57,16 @@ if (isset($_SESSION['user_id'])) {
                 <div class="alert-error">
                     <?php 
                     echo $_SESSION['error_login']; 
-                    unset($_SESSION['error_login']); // On efface l'erreur après affichage
+                    unset($_SESSION['error_login']);
+                    ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['success_register'])): ?>
+                <div class="alert-success">
+                    <?php 
+                    echo $_SESSION['success_register']; 
+                    unset($_SESSION['success_register']);
                     ?>
                 </div>
             <?php endif; ?>
@@ -75,7 +95,7 @@ if (isset($_SESSION['user_id'])) {
     <?php require_once 'includes/footer.php'; ?>
 
     <div id="account-modal" class="modal" style="display: none;">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 550px;">
             <span class="close" onclick="document.getElementById('account-modal').style.display='none'">&times;</span>
             <div class="modal-header">
                 <h2>Mon Compte</h2>
@@ -85,20 +105,39 @@ if (isset($_SESSION['user_id'])) {
                 <button class="tab-btn active" data-tab="register">Inscription</button>
             </div>
             
-            <div id="register-form" class="tab-content active" style="display: block;">
-                <form action="inscription.php" method="POST" style="margin-top: 1rem;">
-                    <div class="form-group">
-                        <label for="register-name">Nom complet</label>
-                        <input type="text" id="register-name" name="name" required placeholder="Ex: Jean Dupont">
+            <div id="register-form" class="tab-content active" style="display: block; max-height: 70vh; overflow-y: auto; padding-right: 5px;">
+                <form id="force-native-register" action="inscription.php" method="POST" style="margin-top: 1rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label for="reg-firstname">Prénom</label>
+                            <input type="text" id="reg-firstname" name="firstname" required placeholder="Ex: Jean">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-lastname">Nom</label>
+                            <input type="text" id="reg-lastname" name="lastname" required placeholder="Ex: Dupont">
+                        </div>
                     </div>
+                    
                     <div class="form-group" style="margin-top: 1rem;">
-                        <label for="register-email">Email</label>
-                        <input type="email" id="register-email" name="email" required placeholder="votre.email@exemple.com">
+                        <label for="reg-email">Email</label>
+                        <input type="email" id="reg-email" name="email" required placeholder="jean.dupont@exemple.com">
                     </div>
+
                     <div class="form-group" style="margin-top: 1rem;">
-                        <label for="register-password">Mot de passe</label>
-                        <input type="password" id="register-password" name="password" required placeholder="••••••••">
+                        <label for="reg-phone">Numéro de téléphone</label>
+                        <input type="tel" id="reg-phone" name="phone" required placeholder="Ex: 06 12 34 56 78">
                     </div>
+
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label for="reg-address">Adresse complète de livraison</label>
+                        <textarea id="reg-address" name="address" required placeholder="Rue, code postal, ville, bâtiment..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: var(--border-radius); font-family: inherit; resize: vertical;" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label for="reg-password">Mot de passe</label>
+                        <input type="password" id="reg-password" name="password" required placeholder="••••••••">
+                    </div>
+                    
                     <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1.5rem;">S'inscrire</button>
                 </form>
             </div>
@@ -106,25 +145,22 @@ if (isset($_SESSION['user_id'])) {
     </div>
 
     <script>
-    // 🛠️ CRÉATION DE LA FONCTION ATTENDUE PAR MODALS.JS
-    function showNotification(message, type) {
-        // Si l'inscription est un succès, on redirige vers les produits
-        if (type === 'success' || message.indexOf('réussie') !== -1) {
-            window.location.href = 'produits.php';
-        } else {
-            // En cas d'erreur, on l'affiche proprement en haut de la modale
-            alert(message);
-        }
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
         var registerTrigger = document.getElementById('open-register-trigger');
         var accountModal = document.getElementById('account-modal');
+        var registerForm = document.getElementById('force-native-register');
         
         if (registerTrigger && accountModal) {
             registerTrigger.addEventListener('click', function(e) {
                 e.preventDefault();
                 accountModal.style.display = 'block';
+            });
+        }
+
+        // Neutralise l'interception AJAX globale de modals.js
+        if (registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                e.stopPropagation();
             });
         }
     });
