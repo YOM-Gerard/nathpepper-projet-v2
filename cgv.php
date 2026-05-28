@@ -22,10 +22,16 @@
         <p>Les poivres d'exception proposés sont décrits avec la plus grande précision possible. Les prix affichés sont en Euros (€) toutes taxes comprises (TTC).</p>
 
         <h2 style="font-family: 'Playfair Display', serif; margin-top: 2rem; color: #1a1b1c;">3. Paiement</h2>
-        <p>Le règlement des achats s'effectue de manière sécurisée via la plateforme de paiement **Stripe** par carte bancaire.</p>
+        <p>Le règlement des achats s'effectue de manière sécurisée via la plateforme de paiement Stripe par carte bancaire.</p>
 
+        <!-- 🛡️ SÉCURITÉ ALIMENTAIRE ET DROIT DE RÉTRACTATION AJUSTÉ -->
         <h2 style="font-family: 'Playfair Display', serif; margin-top: 2rem; color: #1a1b1c;">4. Droit de rétractation</h2>
-        <p>Conformément à la législation européenne, le consommateur dispose d'un délai de <strong>14 jours</strong> à compter de la réception de ses produits pour exercer son droit de rétractation, sans avoir à justifier de motifs ni à payer de pénalités (les frais de retour restant à sa charge).</p>
+        <p>
+            Conformément à l'article L221-28 du Code de la consommation, le droit de rétractation ne peut être exercé pour les contrats de fourniture de biens qui ont été descellés par le consommateur après la livraison et qui ne peuvent être renvoyés pour des raisons d'hygiène ou de protection de la santé.
+        </p>
+        <p>
+            Par conséquent, pour des raisons de sécurité alimentaire et d'hygiène, aucun retour ni remboursement ne sera accepté pour les produits ou sachets de poivre qui auront été ouverts, entamés ou endommagés par le client.
+        </p>
     </main>
 
     <?php include 'includes/footer.php'; ?>
