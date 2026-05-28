@@ -192,5 +192,39 @@ if (session_status() === PHP_SESSION_NONE) {
         }
     });
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkoutBtn = document.getElementById('checkout-button');
+    
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', function() {
+            const totalPriceEl = document.getElementById('cart-total-price');
+            if (!totalPriceEl) return;
+
+            const totalText = totalPriceEl.textContent;
+            // Extrait proprement les chiffres du prix affiché
+            const totalNumeric = parseFloat(totalText.replace(/[^\d.]/g, '')) || 0;
+
+            // 💡 Envoi vers le script de sauvegarde de session
+            fetch('includes/sauvegarder-total.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ total: totalNumeric })
+            })
+            .then(response => {
+                // Si le fichier renvoie une erreur 404 ou 500, on bascule quand même
+                if (!response.ok) {
+                    console.warn("Script de session introuvable, redirection directe.");
+                }
+                window.location.href = 'commande.php';
+            })
+            .catch(err => {
+                console.error("Erreur réseau :", err);
+                window.location.href = 'commande.php';
+            });
+        });
+    }
+});
+</script>
 </body>
 </html>
