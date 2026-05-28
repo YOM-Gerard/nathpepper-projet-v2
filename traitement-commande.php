@@ -60,6 +60,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
     }
 
     try {
+        // 🛡️ SÉCURITÉ ANTI-DOUBLON SERVEUR :
+        // On supprime les anciennes tentatives de cet utilisateur restées 'pending' (non payées)
+        // avant d'ouvrir la nouvelle session de paiement.
+        $clearStmt = $pdo->prepare("DELETE FROM orders WHERE user_id = :user_id AND status = 'pending'");
+        $clearStmt->execute(['user_id' => $userId]);
+
         // 🌐 DÉTECTION AUTOMATIQUE DE L'URL DE TON SITE (Local ou en ligne)
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
         $host = $_SERVER['HTTP_HOST'];
