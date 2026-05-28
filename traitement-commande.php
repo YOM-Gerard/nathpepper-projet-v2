@@ -1,10 +1,10 @@
 <?php
 session_start();
-require_once 'includes/db.php'; // Charge ton instance $pdo
+require_once 'includes/db.php'; // Connexion BDD avec $pdo
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
     $userId = $_SESSION['user_id'];
-    $totalPrice = $_POST['total_price'] ?? 0;
+    $totalPrice = floatval($_POST['total_price'] ?? 0);
     $phone = trim($_POST['delivery_phone'] ?? '');
     $address = trim($_POST['delivery_address'] ?? '');
     $zipcode = trim($_POST['delivery_zipcode'] ?? '');
@@ -16,8 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
     }
 
     try {
-        // Insertion propre avec les colonnes que l'on vient de greffer à ta table orders
-        $stmt = $pdo->prepare("INSERT INTO orders (user_id, total_amount, delivery_phone, delivery_address, delivery_zipcode, delivery_city, status) VALUES (:user_id, :total, :phone, :address, :zipcode, :city, 'En préparation')");
+        // On insère la commande en BDD à l'état 'pending' (En attente)
+        $stmt = $pdo->prepare("INSERT INTO orders (user_id, total_amount, delivery_phone, delivery_address, delivery_zipcode, delivery_city, status) VALUES (:user_id, :total, :phone, :address, :zipcode, :city, 'pending')");
         
         $stmt->execute([
             'user_id' => $userId,
@@ -28,10 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
             'city'    => $city
         ]);
 
-        // Message de succès pour la page Mon Compte
-        $_SESSION['success_register'] = "🎉 Votre commande a été enregistrée avec succès et est en cours de préparation !";
-        
-        header('Location: mon-compte.php');
+        // On récupère le numéro de la commande qui vient d'être créée
+        $orderId = $pdo->lastInsertId();
+
+        // 🚀 Redirection temporaire et sécurisée vers la page de succès
+        header('Location: succes.php?order_id=' . $orderId);
         exit();
 
     } catch (Exception $e) {

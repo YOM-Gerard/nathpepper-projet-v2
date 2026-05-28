@@ -46,10 +46,15 @@ if (isset($_GET['session_id'])) {
     </main>
 
     <script>
-        // Le paiement a réussi, on efface proprement toutes les versions possibles du panier du navigateur
-        localStorage.removeItem('cart');
-        localStorage.removeItem('nathpepper_cart');
-    </script>
+    // 🧹 On vide TOUTES les clés possibles pour être sûr à 100 % que le panier tombe à 0
+    localStorage.removeItem('cart');
+    localStorage.removeItem('nathpepper_cart');
+    localStorage.removeItem('shopping_cart');
+    localStorage.removeItem('panier');
+    
+    // On dit au navigateur de rafraîchir l'affichage du menu s'il existe
+    if (typeof updateCartCount === 'function') { updateCartCount(); }
+</script>
     <?php require_once 'includes/footer.php'; ?>
 </body>
 </html>
