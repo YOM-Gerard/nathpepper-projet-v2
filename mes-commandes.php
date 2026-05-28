@@ -83,4 +83,43 @@ try {
                                 <a href="facture.php?id=<?php echo $order['id']; ?>" target="_blank" class="btn-invoice">📄 Télécharger la facture (PDF)</a>
                             </div>
                             <div style="text-align: right;">
-                                <span class="status-badge
+                                <span class="status-badge <?php echo $order['status'] === 'paid' ? 'status-paid' : 'status-pending'; ?>">
+                                    <?php echo $order['status'] === 'paid' ? '✓ Payée' : '⏳ En attente'; ?>
+                                </span>
+                                <div style="margin-top: 5px; font-weight: 700; font-size: 1.1rem; color: var(--dark-color);">
+                                    <?php echo number_format($order['total_amount'], 2, ',', ' '); ?> €
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="order-body">
+                            <?php
+                            // On va chercher dans la BDD les articles correspondants à CETTE commande spécifique
+                            $stmtItems = $pdo->prepare("SELECT * FROM order_items WHERE order_id = :order_id");
+                            $stmtItems->execute(['order_id' => $order['id']]);
+                            $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+                            
+                            foreach ($items as $item):
+                            ?>
+                                <div class="order-item">
+                                    <span>
+                                        <strong><?php echo htmlspecialchars($item['product_name']); ?></strong> 
+                                        <span style="color: #777; margin-left: 5px;">(x<?php echo $item['quantity']; ?>)</span>
+                                    </span>
+                                    <span style="font-weight: 500;">
+                                        <?php echo number_format($item['price'] * $item['quantity'], 2, ',', ' '); ?> €
+                                    </span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+
+            <?php endif; ?>
+        </section>
+    </main>
+
+    <?php require_once 'includes/footer.php'; ?>
+
+</body>
+</html>
