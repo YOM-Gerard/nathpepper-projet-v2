@@ -12,7 +12,7 @@ $user_id = $_SESSION['user_id'];
 $user_name = $_SESSION['user_name'];
 
 try {
-    // 2. Récupérer toutes les commandes payées ou en attente de cet utilisateur (de la plus récente à la plus ancienne)
+    // 2. Récupérer toutes les commandes de cet utilisateur (de la plus récente à la plus ancienne)
     $stmt = $pdo->prepare("SELECT * FROM orders WHERE user_id = :user_id ORDER BY created_at DESC");
     $stmt->execute(['user_id' => $user_id]);
     $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -71,49 +71,16 @@ try {
                     <div class="order-card">
                         <div class="order-header">
                             <div>
-                                <h3>Commande n°<?php echo $order['id']; ?></h3>
+                                <h3>
+                                    <?php if (!empty($order['invoice_number'])): ?>
+                                        Facture n° <?php echo htmlspecialchars($order['invoice_number']); ?>
+                                    <?php else: ?>
+                                        Commande n° <?php echo $order['id']; ?>
+                                    <?php endif; ?>
+                                </h3>
                                 <small style="color: #888;">Passée le : <?php echo date('d/m/Y à H:i', strtotime($order['created_at'])); ?></small>
                                 <br>
                                 <a href="facture.php?id=<?php echo $order['id']; ?>" target="_blank" class="btn-invoice">📄 Télécharger la facture (PDF)</a>
                             </div>
                             <div style="text-align: right;">
-                                <span class="status-badge <?php echo $order['status'] === 'paid' ? 'status-paid' : 'status-pending'; ?>">
-                                    <?php echo $order['status'] === 'paid' ? '✓ Payée' : '⏳ En attente'; ?>
-                                </span>
-                                <div style="margin-top: 5px; font-weight: 700; font-size: 1.1rem; color: var(--dark-color);">
-                                    <?php echo number_format($order['total_amount'], 2, ',', ' '); ?> €
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="order-body">
-                            <?php
-                            // On va chercher dans la BDD les articles correspondants à CETTE commande spécifique
-                            $stmtItems = $pdo->prepare("SELECT * FROM order_items WHERE order_id = :order_id");
-                            $stmtItems->execute(['order_id' => $order['id']]);
-                            $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
-                            
-                            foreach ($items as $item):
-                            ?>
-                                <div class="order-item">
-                                    <span>
-                                        <strong><?php echo htmlspecialchars($item['product_name']); ?></strong> 
-                                        <span style="color: #777; margin-left: 5px;">(x<?php echo $item['quantity']; ?>)</span>
-                                    </span>
-                                    <span style="font-weight: 500;">
-                                        <?php echo number_format($item['price'] * $item['quantity'], 2, ',', ' '); ?> €
-                                    </span>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-
-            <?php endif; ?>
-        </section>
-    </main>
-
-    <?php require_once 'includes/footer.php'; ?>
-
-</body>
-</html>
+                                <span class="status-badge
