@@ -16,6 +16,12 @@ if (isset($_GET['session_id'])) {
         // On vérifie si une ligne a bien été modifiée (commande trouvée)
         if ($stmt->rowCount() > 0) {
             $order_updated = true;
+
+            // 🔒 SÉCURITÉ SERVEUR : On nettoie les variables de session liées au panier ou prix
+            // Cela évite qu'un rafraîchissement de page ne laisse des résidus de l'ancienne commande
+            if (isset($_SESSION['cart'])) { unset($_SESSION['cart']); }
+            if (isset($_SESSION['panier'])) { unset($_SESSION['panier']); }
+            if (isset($_SESSION['total_price'])) { unset($_SESSION['total_price']); }
         }
     } catch (Exception $e) {
         // En cas d'erreur de requête, on laisse le script continuer sans tout bloquer
@@ -46,15 +52,15 @@ if (isset($_GET['session_id'])) {
     </main>
 
     <script>
-    // 🧹 On vide TOUTES les clés possibles pour être sûr à 100 % que le panier tombe à 0
-    localStorage.removeItem('cart');
-    localStorage.removeItem('nathpepper_cart');
-    localStorage.removeItem('shopping_cart');
-    localStorage.removeItem('panier');
-    
-    // On dit au navigateur de rafraîchir l'affichage du menu s'il existe
-    if (typeof updateCartCount === 'function') { updateCartCount(); }
-</script>
+        // 🧹 On vide TOUTES les clés possibles pour être sûr à 100 % que le panier tombe à 0 côté client
+        localStorage.removeItem('cart');
+        localStorage.removeItem('nathpepper_cart');
+        localStorage.removeItem('shopping_cart');
+        localStorage.removeItem('panier');
+        
+        // On dit au navigateur de rafraîchir l'affichage du menu s'il existe
+        if (typeof updateCartCount === 'function') { updateCartCount(); }
+    </script>
     <?php require_once 'includes/footer.php'; ?>
 </body>
 </html>
