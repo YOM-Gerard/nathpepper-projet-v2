@@ -1,8 +1,7 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-require_once 'includes/db.php';
+session_start();
+// Si tu as besoin d'une connexion BDD ou de scripts de traitement pour le formulaire, 
+// conserve tes inclusions php habituelles tout en haut ici.
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -11,74 +10,22 @@ require_once 'includes/db.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contactez-nous - Nathpepper</title>
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/responsive.css">
     <link rel="stylesheet" href="styles/components.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* Fond de page blanc écru lumineux */
-        body { background-color: #fbf9f6 !important; color: #1a1b1c; font-family: 'Inter', sans-serif; }
-        
-        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; max-width: 1000px; margin: 0 auto; padding: 4rem 1.5rem; }
-        
-        .contact-title { font-family: 'Playfair Display', serif; color: #1a1b1c; font-size: 2.5rem; margin-bottom: 1.5rem; }
-        
-        .info-block { margin-bottom: 2rem; }
-        .info-block h4 { color: #8d6e63; margin-bottom: 0.5rem; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; }
-        .info-block p { color: #444444; line-height: 1.6; margin: 0; }
-        
-        /* Formulaire blanc épuré posé sur le fond écru */
-        .contact-form { background: #ffffff; border: 1px solid #eae5dc; padding: 2.5rem; border-radius: 2px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); }
-        .form-group { margin-bottom: 1.5rem; text-align: left; }
-        .form-group label { display: block; font-size: 0.85rem; color: #1a1b1c; margin-bottom: 0.5rem; font-weight: 500; }
-        
-        /* Inputs clairs aux contours fins */
-        .form-control { width: 100%; padding: 12px; background: #fbf9f6; border: 1px solid #eae5dc; border-radius: 2px; color: #1a1b1c; font-family: inherit; font-size: 0.95rem; box-sizing: border-box; }
-        .form-control:focus { border-color: #1a1b1c; outline: none; }
-        
-        /* ─── STYLE DU BOUTON REVISITÉ ET SÉCURISÉ ─── */
-        .btn-gold { 
-            background-color: #1a1b1c !important; /* Même couleur noire mate que ton footer */
-            color: #ffffff !important; 
-            border: 1px solid #1a1b1c !important; 
-            width: 100%; 
-            padding: 14px; 
-            
-            /* Bords plus arrondis */
-            border-radius: 6px !important; 
-            
-            /* Police Haute Gastronomie */
-            font-family: 'Playfair Display', serif !important; 
-            font-size: 1.05rem !important; 
-            font-weight: 500 !important; 
-            text-transform: none !important; 
-            letter-spacing: 0.5px !important;
-            
-            cursor: pointer; 
-            transition: all 0.2s ease-in-out !important; 
+        body { background-color: #fcfbfa; color: #1a1b1c; }
+        .contact-container { max-width: 1100px; margin: 0 auto; padding: 40px 1.5rem; }
+        .contact-grid { display: grid; grid-template-columns: 1fr; gap: 3rem; }
+        @media (min-width: 768px) {
+            .contact-grid { grid-template-columns: 1fr 1fr; align-items: start; }
         }
-        
-        .btn-gold:hover { 
-            background-color: #333333 !important; 
-            border-color: #333333 !important; 
-        }
-        
-        .btn-gold:active { 
-            background-color: #fbf9f6 !important; 
-            color: #1a1b1c !important; 
-        }
-
-        /* Le header reste blanc pur comme sur produits.php */
-        .header {
-            background-color: #ffffff !important;
-            border-bottom: 1px solid #eae5dc !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02) !important;
-        }
-
-        /* Ajustements d'aération sur smartphone */
-        @media (max-width: 768px) { 
-            .contact-grid { grid-template-columns: 1fr; gap: 2.5rem; padding: 2rem 1.5rem; } 
-            .contact-title { font-size: 2.1rem; }
-            .contact-form { padding: 1.8rem; }
+        .contact-info h2 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 1.5rem; }
+        .contact-info p { font-family: 'Inter', sans-serif; font-size: 1.1rem; line-height: 1.6; color: #444; margin-bottom: 2rem; }
+        .contact-card { background: #fff; padding: 2.5rem; border-radius: 4px; border: 1px solid #e8e2d5; box-shadow: 0 4px 15px rgba(0,0,0,0.01); }
+        .form-group { margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 11px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Inter', sans-serif; font-size: 0.9rem; box-sizing: border-box;
         }
     </style>
 </head>
@@ -87,47 +34,55 @@ require_once 'includes/db.php';
     <?php require_once 'includes/header.php'; ?>
 
     <main class="container">
-        <div style="height: 120px; width: 100%;"></div>
+        <div style="height: 140px; width: 100%;"></div>
 
-        <div class="contact-grid">
-            <div>
-                <h1 class="contact-title">Entrer en Relation</h1>
-                <p style="color: #444444; line-height: 1.7; margin-bottom: 3rem; font-weight: 300;">Vous êtes un chef cuisinier, un amateur exigeant ou vous avez simplement une question sur l'une de nos variétés ? Notre service conciergerie est à votre entière disposition.</p>
+        <div class="contact-container">
+            <div class="contact-grid">
                 
-                <div class="info-block">
-                    <h4>Le Comptoir Parisien</h4>
-                    <p style="font-weight: 300;">12 rue des Poivres Rares<br>75001 Paris, France</p>
-                </div>
-
-                <div class="info-block">
-                    <h4>Correspondance</h4>
-                    <p style="font-weight: 300;">Mails : contact@nathpepper.com<br>Téléphone : +33 (0)1 42 60 00 00</p>
-                </div>
-            </div>
-
-            <div>
-                <form class="contact-form" action="#" method="POST" onsubmit="alert('Message simulé avec succès !'); return false;">
-                    <div class="form-group">
-                        <label for="name">Nom Complet</label>
-                        <input type="text" id="name" class="form-control" placeholder="Gilbert Grandcru" required>
-                    </div>
+                <!-- À GAUCHE : TEXTES RÉELS ET SIMPLES -->
+                <div class="contact-info">
+                    <h2>Contact</h2>
+                    <p>
+                        Que vous soyez un professionnel de la cuisine, un passionné ou simplement curieux, vous avez une question sur l'une de nos variétés de poivres ? Écrivez-nous pour composer la sélection parfaite selon vos envies.
+                    </p>
                     
-                    <div class="form-group">
-                        <label for="email">Adresse E-mail</label>
-                        <input type="email" id="email" class="form-control" placeholder="gilbert@mail.com" required>
+                    <div style="border-top: 1px solid #e8e2d5; padding-top: 1.5rem;">
+                        <span style="font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #888;">Correspondance</span>
+                        <p style="margin-top: 0.5rem; font-size: 1.1rem; font-weight: 500;">
+                            Email : <a href="mailto:contact@nathpepper.com" style="color: #1a1b1c; text-decoration: underline;">contact@nathpepper.com</a>
+                        </p>
                     </div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="message">Votre Message</label>
-                        <textarea id="message" class="form-control" rows="5" placeholder="Décrivez votre projet gastronomique ou votre question..." required></textarea>
-                    </div>
+                <!-- À DROITE : FORMULAIRE PROPRE -->
+                <div class="contact-card">
+                    <form action="#" method="POST">
+                        <div class="form-group">
+                            <label>Nom Complet</label>
+                            <input type="text" name="name" required placeholder="Votre nom">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Adresse E-mail</label>
+                            <input type="email" name="email" required placeholder="votre@email.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Votre Message</label>
+                            <textarea name="message" rows="5" required placeholder="Posez votre question ici..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem; padding: 12px; background: #1a1b1c; font-weight: 600; border: none; color: #fff; cursor: pointer;">
+                            Envoyer le message
+                        </button>
+                    </form>
+                </div>
 
-                    <button type="submit" class="btn-gold">Envoyer le message</button>
-                </form>
             </div>
         </div>
     </main>
 
+    <div style="height: 100px; width: 100%;"></div>
     <?php require_once 'includes/footer.php'; ?>
 
 </body>
