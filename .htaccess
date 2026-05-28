@@ -1,0 +1,6 @@
+# Désactiver l'affichage des erreurs PHP directement sur le navigateur des visiteurs
+php_flag display_errors off
+php_value error_reporting 0
+
+# Sécuriser l'arborescence (empêche les gens de lister le contenu de tes dossiers comme /includes/)
+Options -Indexes
